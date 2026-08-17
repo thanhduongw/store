@@ -20,25 +20,21 @@ class Order < ApplicationRecord
   end
 
   def self.create_from_cart!(cart, order_params, user = nil)
-    Order.transaction do
-      # 1. Kiểm tra tồn kho lần cuối
+    transaction do
       cart.cart_items.each do |item|
         product = item.product.lock!
-
         if product.inventory_count < item.quantity
-          raise ActiveRecord::Rollback,
+          raise StandardError,
                 "Sản phẩm '#{product.name}' không đủ số lượng (còn #{product.inventory_count})"
         end
       end
 
-      # 2. Tạo đơn hàng
       order = new(order_params)
-      order.user = user
+      order.user  = user
       order.total = cart.total_price
       order.status = "pending"
       order.save!
 
-      # 3. Tạo order_items + trừ kho
       cart.cart_items.each do |item|
         order.order_items.create!(
           product: item.product,
@@ -46,15 +42,10 @@ class Order < ApplicationRecord
           quantity: item.quantity,
           price: item.product.price
         )
-
-        item.product.update!(
-          inventory_count: item.product.inventory_count - item.quantity
-        )
+        item.product.update!(inventory_count: item.product.inventory_count - item.quantity)
       end
 
-      # 4. Xóa giỏ hàng
       cart.clear!
-
       order
     end
   end

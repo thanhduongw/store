@@ -4,8 +4,8 @@ class CartItem < ApplicationRecord
 
   validates :quantity, numericality: { only_integer: true, greater_than: 0 }
 
-  # Thành tiền của dòng này
   def total_price
-    product.price * quantity
+    return 0 unless product
+    (product.price || 0) * quantity
   end
 end

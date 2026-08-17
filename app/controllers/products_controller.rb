@@ -2,10 +2,9 @@ class ProductsController < ApplicationController
   before_action :set_product, only: %i[show]
 
   def index
-  @pagy, @products = pagy(
-    Product.active.includes(:category, featured_image_attachment: :blob).order(created_at: :desc),
-    items: 12
-  )
+    @products = Product.includes(:category, featured_image_attachment: :blob)
+                       .active
+                       .order(created_at: :desc)
   end
 
   def show
@@ -14,6 +13,8 @@ class ProductsController < ApplicationController
   private
 
   def set_product
-    @product = Product.find(params[:id])
+    @product = Product.active.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    redirect_to products_path, alert: "Sản phẩm không tồn tại hoặc đã ngừng bán."
   end
 end

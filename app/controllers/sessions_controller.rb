@@ -1,20 +1,24 @@
 class SessionsController < ApplicationController
   allow_unauthenticated_access only: %i[ new create ]
-  rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_session_path, alert: "Try again later." }
+  rate_limit to: 10, within: 3.minutes, only: :create,
+             with: -> { redirect_to new_session_path, alert: "Try again later." }
 
   def new
   end
 
   def create
     if user = User.authenticate_by(params.permit(:email_address, :password))
-      # === MERGE GIỎ HÀNG ===
       merge_guest_cart_to_user(user)
-
       start_new_session_for user
       redirect_to after_authentication_url, notice: "Đăng nhập thành công!"
     else
       redirect_to new_session_path, alert: "Email hoặc mật khẩu không đúng."
     end
+  end
+
+  def destroy                         # Sửa: chuyển ra khỏi private
+    terminate_session
+    redirect_to root_path, notice: "Bạn đã đăng xuất thành công.", status: :see_other
   end
 
   private
@@ -33,10 +37,5 @@ class SessionsController < ApplicationController
 
     guest_cart.destroy
     session.delete(:cart_id)
-  end
-
-  def destroy
-    terminate_session
-    redirect_to root_path, notice: "Bạn đã đăng xuất thành công.", status: :see_other
   end
 end
