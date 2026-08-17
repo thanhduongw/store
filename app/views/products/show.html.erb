@@ -1,75 +1,86 @@
-<div class="bg-white rounded shadow-sm p-4 md:p-6">
-  <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
-    <!-- Ảnh -->
+<div class="py-4 space-y-3">
+  <div class="bg-white rounded-sm px-4 py-2.5 text-sm text-gray-500 flex items-center gap-2 shadow-sm">
+    <%= link_to "Trang chủ", root_path, class: "hover:text-[#ee4d2d]" %>
+    <span>›</span>
+    <span class="text-gray-700"><%= @product.category&.name || "Sản phẩm" %></span>
+    <span>›</span>
+    <span class="text-gray-400 truncate"><%= @product.name %></span>
+  </div>
+
+  <div class="bg-white rounded-sm shadow-sm p-4 md:p-6 grid grid-cols-1 md:grid-cols-12 gap-8">
     <div class="md:col-span-5">
-      <% if @product.featured_image.attached? %>
-        <%= image_tag @product.featured_image.variant(resize_to_limit: [500, 500]),
-              class: "w-full rounded border" %>
-      <% else %>
-        <div class="w-full aspect-square bg-gray-100 flex items-center justify-center text-gray-400">
-          Không có ảnh
-        </div>
-      <% end %>
+      <div class="aspect-square bg-gray-50 rounded overflow-hidden border border-gray-100">
+        <% if @product.featured_image.attached? %>
+          <%= image_tag @product.featured_image.variant(resize_to_limit: [600, 600]), class: "w-full h-full object-contain" %>
+        <% else %>
+          <div class="w-full h-full flex items-center justify-center text-gray-400">Không có ảnh</div>
+        <% end %>
+      </div>
     </div>
 
-    <!-- Thông tin -->
     <div class="md:col-span-7">
-      <h1 class="text-xl font-medium mb-3"><%= @product.name %></h1>
+      <h1 class="text-xl font-medium text-gray-800 mb-2"><%= @product.name %></h1>
 
-      <div class="flex items-center gap-3 mb-4">
-        <span class="text-3xl text-[#EE4D2D] font-medium">
-          ₫<%= number_with_delimiter(@product.price.to_i) %>
+      <% if @product.sku.present? %>
+        <p class="text-xs text-gray-400 mb-3">SKU: <%= @product.sku %></p>
+      <% end %>
+
+      <div class="bg-gray-50 rounded-md px-4 py-3 flex items-center gap-3 mb-4 flex-wrap">
+        <% if @product.on_sale? %>
+          <span class="text-gray-400 line-through text-base">
+            <%= number_to_currency(@product.compare_at_price, unit: "₫", precision: 0, format: "%n%u") %>
+          </span>
+        <% end %>
+        <span class="text-[#ee4d2d] text-3xl font-semibold">
+          <%= number_to_currency(@product.price, unit: "₫", precision: 0, format: "%n%u") %>
         </span>
         <% if @product.on_sale? %>
-          <span class="text-gray-400 line-through text-lg">
-            ₫<%= number_with_delimiter(@product.compare_at_price.to_i) %>
-          </span>
-          <span class="bg-[#EE4D2D] text-white text-xs px-1.5 py-0.5 rounded">
+          <span class="bg-[#ee4d2d] text-white text-xs font-bold px-1.5 py-0.5 rounded-sm">
             -<%= @product.discount_percentage %>%
           </span>
         <% end %>
       </div>
 
-      <div class="space-y-3 text-sm text-gray-600 mb-6">
-        <div class="flex">
-          <span class="w-28 text-gray-400">Danh mục</span>
-          <span><%= @product.category&.name || "Chưa phân loại" %></span>
-        </div>
-        <div class="flex">
-          <span class="w-28 text-gray-400">Kho</span>
-          <span><%= @product.inventory_count %></span>
-        </div>
-        <div class="flex">
-          <span class="w-28 text-gray-400">SKU</span>
-          <span><%= @product.sku.presence || "—" %></span>
-        </div>
+      <div class="flex items-center gap-4 text-sm text-gray-500 mb-6 flex-wrap">
+        <span>Danh mục: <span class="text-gray-700"><%= @product.category&.name || "Chưa phân loại" %></span></span>
+        <span class="w-px h-4 bg-gray-200"></span>
+        <span>Kho: <span class="text-gray-700"><%= @product.inventory_count %> sản phẩm</span></span>
       </div>
 
-      <!-- Số lượng + Thêm vào giỏ -->
       <% if @product.inventory_count > 0 %>
-        <%= form_with url: cart_items_path, method: :post, class: "flex items-center gap-4" do %>
+        <%= form_with url: cart_items_path, method: :post do %>
           <%= hidden_field_tag :product_id, @product.id %>
-          <div class="flex items-center border rounded">
-            <button type="button" onclick="this.nextElementSibling.stepDown()" class="px-3 py-2 text-gray-500 hover:bg-gray-100">−</button>
-            <%= number_field_tag :quantity, 1, min: 1, max: @product.inventory_count,
-                  class: "w-14 text-center border-0 focus:ring-0" %>
-            <button type="button" onclick="this.previousElementSibling.stepUp()" class="px-3 py-2 text-gray-500 hover:bg-gray-100">+</button>
+          <div class="flex items-center gap-4 mb-6 flex-wrap">
+            <span class="text-sm text-gray-600">Số lượng</span>
+            <div class="flex items-center border border-gray-300 rounded-sm">
+              <button type="button"
+                      onclick="const i=this.nextElementSibling; i.stepDown();"
+                      class="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-50">−</button>
+              <%= number_field_tag :quantity, 1, min: 1, max: @product.inventory_count,
+                    class: "w-14 h-8 text-center border-x border-gray-300 focus:outline-none [appearance:textfield]" %>
+              <button type="button"
+                      onclick="const i=this.previousElementSibling; i.stepUp();"
+                      class="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-50">+</button>
+            </div>
+            <span class="text-xs text-gray-400"><%= @product.inventory_count %> sản phẩm có sẵn</span>
           </div>
-
           <%= submit_tag "Thêm Vào Giỏ Hàng",
-                class: "bg-[#EE4D2D] hover:bg-[#D73211] text-white px-8 py-3 rounded font-medium" %>
+                class: "bg-[#ee4d2d] hover:bg-[#d9431f] text-white font-medium px-8 py-3 rounded-sm cursor-pointer" %>
         <% end %>
       <% else %>
-        <p class="text-red-500 font-medium">Hết hàng</p>
+        <div class="mb-6">
+          <span class="inline-block bg-gray-100 text-gray-500 font-medium px-6 py-3 rounded-sm">Sản phẩm tạm hết hàng</span>
+        </div>
       <% end %>
+
+      <%= link_to "← Quay lại danh sách sản phẩm", products_path, class: "text-sm text-gray-500 hover:text-[#ee4d2d]" %>
     </div>
   </div>
 
-  <!-- Mô tả -->
-  <div class="mt-10 border-t pt-6">
-    <h2 class="text-lg font-medium mb-4">MÔ TẢ SẢN PHẨM</h2>
-    <div class="text-gray-700 leading-relaxed">
-      <%= simple_format(@product.description) %>
+  <div class="bg-white rounded-sm shadow-sm p-4 md:p-6">
+    <h2 class="text-base font-semibold text-gray-800 uppercase mb-4 pb-3 border-b">Mô tả sản phẩm</h2>
+    <div class="text-sm text-gray-600 leading-relaxed">
+      <%= simple_format(@product.description.presence || "Chưa có mô tả cho sản phẩm này.") %>
     </div>
   </div>
 </div>

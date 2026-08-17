@@ -1,70 +1,80 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
   <head>
-    <title>Store - Mua sắm online</title>
+    <title><%= content_for(:title) || "Store" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Store">
+    <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# LƯU Ý: trước đây layout này dùng stylesheet_link_tag :app, không nạp file CSS
+        do tailwindcss-rails build ra (app/assets/builds/tailwind.css), nên toàn bộ
+        class Tailwind trong giao diện khách hàng không có tác dụng. Đã sửa lại
+        thành "tailwind" giống layout admin để CSS hoạt động đúng. %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
-    <style>
-      :root {
-        --shopee-orange: #EE4D2D;
-        --shopee-orange-dark: #D73211;
-      }
-    </style>
   </head>
 
-  <body class="bg-gray-100 text-gray-800">
-    <!-- Top bar nhỏ -->
-    <div class="bg-white border-b text-xs text-gray-500">
-      <div class="max-w-7xl mx-auto px-4 py-1 flex justify-between">
-        <div>Kênh Người Bán | Tải ứng dụng | Kết nối</div>
-        <div class="flex gap-4">
+  <body class="bg-[#f5f5f5] text-gray-800">
+    <header class="sticky top-0 z-50 bg-linear-to-r from-[#f53d2d] to-[#ee4d2d] shadow-md">
+      <div class="max-w-7xl mx-auto px-4">
+        <!-- Thanh tiện ích trên cùng -->
+        <div class="flex justify-end items-center gap-4 py-1.5 text-xs text-white/90 border-b border-white/20">
           <% if authenticated? %>
-            <span>Xin chào, <%= Current.user.full_name %></span>
             <% if Current.user.admin? %>
-              <%= link_to "Admin", admin_root_path, class: "hover:text-orange-600" %>
+              <%= link_to "Kênh quản trị", admin_root_path, class: "hover:text-white" %>
+              <span class="text-white/40">|</span>
             <% end %>
-            <%= button_to "Đăng xuất", session_path, method: :delete, class: "hover:text-orange-600" %>
+            <span>Xin chào, <b><%= Current.user.full_name %></b></span>
+            <span class="text-white/40">|</span>
+            <%= button_to "Đăng xuất", session_path, method: :delete,
+                  class: "hover:underline bg-transparent border-0 p-0 text-white/90 text-xs cursor-pointer" %>
           <% else %>
-            <%= link_to "Đăng ký", sign_up_path, class: "hover:text-orange-600" %>
-            <span>|</span>
-            <%= link_to "Đăng nhập", new_session_path, class: "hover:text-orange-600" %>
+            <%= link_to "Đăng ký", sign_up_path, class: "hover:text-white" %>
+            <span class="text-white/40">|</span>
+            <%= link_to "Đăng nhập", new_session_path, class: "hover:text-white" %>
           <% end %>
         </div>
-      </div>
-    </div>
 
-    <!-- Header chính -->
-    <header class="bg-(--shopee-orange) text-white sticky top-0 z-50 shadow">
-      <div class="max-w-7xl mx-auto px-4 py-3">
-        <div class="flex items-center gap-8">
-          <!-- Logo -->
-          <%= link_to root_path, class: "text-2xl font-bold tracking-tight flex items-center gap-2" do %>
-            <span class="bg-white text-(--shopee-orange) px-2 py-1 rounded">S</span>
-            Store
+        <!-- Logo, tìm kiếm, giỏ hàng -->
+        <div class="flex items-center gap-4 sm:gap-8 py-3">
+          <%= link_to root_path, class: "shrink-0" do %>
+            <span class="text-white text-2xl sm:text-3xl font-bold italic tracking-tight">Store</span>
           <% end %>
 
-          <!-- Ô tìm kiếm -->
-          <div class="flex-1 max-w-3xl">
-            <form action="<%= products_path %>" method="get" class="flex">
-              <input type="text" name="q" placeholder="Tìm sản phẩm, thương hiệu và tên shop"
-                     class="w-full px-4 py-2.5 rounded-l text-gray-800 focus:outline-none">
-              <button type="submit" class="bg-(--shopee-orange-dark) px-6 rounded-r hover:bg-orange-700">
-                Tìm
+          <%# Ô tìm kiếm hiện chỉ mang tính giao diện: form GET tới trang sản phẩm.
+              ProductsController#index hiện chưa xử lý tham số "q" nên chưa lọc được
+              kết quả theo từ khóa — cần bổ sung phần backend nếu muốn tìm kiếm hoạt động thật. %>
+          <%= form_with url: products_path, method: :get, class: "flex-1 hidden sm:block" do %>
+            <div class="flex bg-white rounded-sm overflow-hidden">
+              <input type="text" name="q" placeholder="Tìm sản phẩm bạn muốn mua..."
+                     class="flex-1 px-4 py-2.5 text-sm text-gray-800 focus:outline-none" />
+              <button type="submit" class="bg-[#ee4d2d] hover:bg-[#d9431f] px-5 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1 0 6.35 6.35a7.5 7.5 0 0 0 10.3 10.3Z" />
+                </svg>
               </button>
-            </form>
-          </div>
+            </div>
+          <% end %>
 
-          <!-- Giỏ hàng -->
-          <%= link_to cart_path, class: "relative flex items-center gap-1 hover:opacity-90" do %>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          <%= link_to cart_path, class: "relative shrink-0 flex flex-col items-center text-white group" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 1.94-4.716 2.436-7.235.122-.617-.318-1.152-.94-1.152H5.106M7.5 14.25 5.106 5.653" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
             </svg>
-            <span class="text-sm">Giỏ hàng</span>
             <% if current_cart.total_quantity > 0 %>
-              <span class="absolute -top-2 -right-3 bg-white text-(--shopee-orange) text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+              <span class="absolute -top-2 -right-3 bg-white text-[#ee4d2d] text-xs font-bold rounded-full h-5 min-w-5 px-1 flex items-center justify-center border border-[#ee4d2d]">
                 <%= current_cart.total_quantity %>
               </span>
             <% end %>
@@ -73,26 +83,49 @@
       </div>
     </header>
 
-    <!-- Flash messages -->
-    <% if notice.present? %>
-      <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 max-w-7xl mx-auto mt-4">
-        <%= notice %>
-      </div>
-    <% end %>
-    <% if alert.present? %>
-      <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 max-w-7xl mx-auto mt-4">
-        <%= alert %>
-      </div>
-    <% end %>
+    <div class="max-w-7xl mx-auto px-4">
+      <% if notice.present? %>
+        <div class="bg-green-50 border border-green-300 text-green-800 text-sm px-4 py-3 rounded mt-4">
+          <%= notice %>
+        </div>
+      <% end %>
+      <% if alert.present? %>
+        <div class="bg-red-50 border border-red-300 text-red-800 text-sm px-4 py-3 rounded mt-4">
+          <%= alert %>
+        </div>
+      <% end %>
+    </div>
 
-    <main class="max-w-7xl mx-auto px-4 py-6">
+    <main class="max-w-7xl mx-auto px-4 pb-16">
       <%= yield %>
     </main>
 
-    <!-- Footer đơn giản -->
-    <footer class="bg-white border-t mt-12 py-8 text-sm text-gray-500">
-      <div class="max-w-7xl mx-auto px-4 text-center">
-        © 2026 Store. Giao diện lấy cảm hứng từ Shopee.
+    <footer class="bg-white border-t mt-16">
+      <div class="max-w-7xl mx-auto px-4 py-10 grid grid-cols-2 sm:grid-cols-4 gap-6 text-sm text-gray-500">
+        <div>
+          <p class="font-semibold text-gray-700 mb-3">Chăm sóc khách hàng</p>
+          <p class="mb-1.5">Trung tâm hỗ trợ</p>
+          <p class="mb-1.5">Hướng dẫn mua hàng</p>
+          <p class="mb-1.5">Chính sách đổi trả</p>
+        </div>
+        <div>
+          <p class="font-semibold text-gray-700 mb-3">Về Store</p>
+          <p class="mb-1.5">Giới thiệu</p>
+          <p class="mb-1.5">Tuyển dụng</p>
+          <p class="mb-1.5">Điều khoản</p>
+        </div>
+        <div>
+          <p class="font-semibold text-gray-700 mb-3">Thanh toán</p>
+          <p class="mb-1.5">Thanh toán khi nhận hàng</p>
+        </div>
+        <div>
+          <p class="font-semibold text-gray-700 mb-3">Theo dõi chúng tôi</p>
+          <p class="mb-1.5">Facebook</p>
+          <p class="mb-1.5">Instagram</p>
+        </div>
+      </div>
+      <div class="border-t py-4 text-center text-xs text-gray-400">
+        © <%= Date.current.year %> Store. Bản quyền thuộc về Store.
       </div>
     </footer>
   </body>

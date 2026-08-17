@@ -1,49 +1,57 @@
-<div class="mb-6">
-  <h1 class="text-xl font-medium text-gray-700">Gợi ý hôm nay</h1>
-</div>
+<div class="py-4">
+  <div class="bg-white rounded-sm px-4 py-2.5 mb-4 text-sm text-gray-500 flex items-center gap-2 shadow-sm">
+    <span class="text-[#ee4d2d] font-medium">Trang chủ</span>
+    <span>›</span>
+    <span class="text-gray-700">Tất cả sản phẩm</span>
+  </div>
 
-<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-  <% @products.each do |product| %>
-    <%= link_to product_path(product), class: "bg-white rounded-sm shadow-sm hover:shadow-md transition group" do %>
-      <!-- Ảnh -->
-      <div class="relative aspect-square overflow-hidden">
-        <% if product.featured_image.attached? %>
-          <%= image_tag product.featured_image.variant(resize_to_limit: [300, 300]),
-                class: "w-full h-full object-cover group-hover:scale-105 transition duration-300" %>
-        <% else %>
-          <div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-sm">
-            No Image
+  <% if @products.any? %>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+      <% @products.each do |product| %>
+        <%= link_to product, class: "bg-white rounded-sm shadow-sm hover:shadow-lg transition-shadow duration-200 overflow-hidden group" do %>
+          <div class="relative aspect-square bg-gray-100 overflow-hidden">
+            <% if product.featured_image.attached? %>
+              <%= image_tag product.featured_image.variant(resize_to_limit: [400, 400]),
+                    class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" %>
+            <% else %>
+              <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">Không có ảnh</div>
+            <% end %>
+
+            <% if product.on_sale? %>
+              <span class="absolute top-0 right-0 bg-[#ffce3d] text-[#ee4d2d] text-[10px] font-bold px-1.5 py-1">
+                -<%= product.discount_percentage %>%
+              </span>
+            <% end %>
+
+            <% if product.inventory_count == 0 %>
+              <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <span class="text-white text-xs font-semibold border border-white px-2 py-1 rounded">Hết hàng</span>
+              </div>
+            <% end %>
+          </div>
+
+          <div class="p-2.5">
+            <p class="text-sm text-gray-800 line-clamp-2 min-h-10 leading-tight"><%= product.name %></p>
+
+            <div class="mt-2 flex items-baseline gap-1.5 flex-wrap">
+              <span class="text-[#ee4d2d] font-medium">
+                <%= number_to_currency(product.price, unit: "₫", precision: 0, format: "%n%u") %>
+              </span>
+              <% if product.on_sale? %>
+                <span class="text-gray-400 text-xs line-through">
+                  <%= number_to_currency(product.compare_at_price, unit: "₫", precision: 0, format: "%n%u") %>
+                </span>
+              <% end %>
+            </div>
+
+            <p class="text-[11px] text-gray-400 mt-1">Còn <%= product.inventory_count %> sản phẩm</p>
           </div>
         <% end %>
-
-        <% if product.on_sale? %>
-          <div class="absolute top-0 right-0 bg-[#EE4D2D] text-white text-xs font-bold px-1.5 py-0.5">
-            -<%= product.discount_percentage %>%
-          </div>
-        <% end %>
-      </div>
-
-      <!-- Thông tin -->
-      <div class="p-2">
-        <h3 class="text-sm text-gray-800 line-clamp-2 h-10 mb-1">
-          <%= product.name %>
-        </h3>
-
-        <div class="flex items-baseline gap-1">
-          <span class="text-[#EE4D2D] font-medium">
-            ₫<%= number_with_delimiter(product.price.to_i) %>
-          </span>
-          <% if product.on_sale? %>
-            <span class="text-xs text-gray-400 line-through">
-              ₫<%= number_with_delimiter(product.compare_at_price.to_i) %>
-            </span>
-          <% end %>
-        </div>
-
-        <div class="text-xs text-gray-400 mt-1">
-          Còn <%= product.inventory_count %>
-        </div>
-      </div>
-    <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="bg-white rounded-sm shadow-sm text-center py-20 text-gray-400">
+      Chưa có sản phẩm nào.
+    </div>
   <% end %>
 </div>

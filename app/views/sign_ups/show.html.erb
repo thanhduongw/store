@@ -1,53 +1,46 @@
-<div class="max-w-md mx-auto py-12 px-4">
-  <h1 class="text-3xl font-bold text-center mb-8">Đăng ký tài khoản</h1>
+<div class="min-h-[70vh] flex items-center justify-center py-10">
+  <div class="w-full max-w-4xl bg-white rounded-sm shadow-lg overflow-hidden grid grid-cols-1 md:grid-cols-2">
+    <div class="hidden md:flex flex-col items-center justify-center bg-gradient-to-br from-[#f53d2d] to-[#ee4d2d] p-10 text-white text-center">
+      <div class="text-4xl font-bold italic mb-4">Store</div>
+      <p class="text-white/90 text-sm">Đăng ký tài khoản để mua sắm dễ dàng hơn</p>
+    </div>
 
-  <%= form_with model: @user, url: sign_up_path, class: "space-y-5" do |form| %>
-    <% if @user.errors.any? %>
-      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
-        <% @user.errors.full_messages.each do |message| %>
-          <p><%= message %></p>
+    <div class="p-8 md:p-10">
+      <h1 class="text-xl font-medium text-gray-800 mb-6">Đăng Ký Tài Khoản</h1>
+
+      <%= form_with model: @user, url: sign_up_path, class: "space-y-4" do |form| %>
+        <% if @user.errors.any? %>
+          <div class="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded">
+            <% @user.errors.full_messages.each do |message| %>
+              <p><%= message %></p>
+            <% end %>
+          </div>
         <% end %>
-      </div>
-    <% end %>
 
-    <div class="grid grid-cols-2 gap-4">
-      <div>
-        <%= form.label :first_name, "Họ", class: "block text-sm font-medium text-gray-700" %>
-        <%= form.text_field :first_name, required: true, autofocus: true,
-              class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
-      </div>
-      <div>
-        <%= form.label :last_name, "Tên", class: "block text-sm font-medium text-gray-700" %>
-        <%= form.text_field :last_name, required: true,
-              class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
-      </div>
+        <div class="grid grid-cols-2 gap-3">
+          <%= form.text_field :first_name, required: true, autofocus: true, placeholder: "Họ",
+                class: "w-full rounded-sm border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:border-[#ee4d2d]" %>
+          <%= form.text_field :last_name, required: true, placeholder: "Tên",
+                class: "w-full rounded-sm border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:border-[#ee4d2d]" %>
+        </div>
+
+        <%= form.email_field :email_address, required: true, placeholder: "Email",
+              class: "w-full rounded-sm border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:border-[#ee4d2d]" %>
+
+        <%= form.password_field :password, required: true, placeholder: "Mật khẩu",
+              class: "w-full rounded-sm border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:border-[#ee4d2d]" %>
+
+        <%= form.password_field :password_confirmation, required: true, placeholder: "Nhập lại mật khẩu",
+              class: "w-full rounded-sm border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:border-[#ee4d2d]" %>
+
+        <%= form.submit "Đăng Ký",
+              class: "w-full bg-[#ee4d2d] hover:bg-[#d9431f] text-white font-medium py-2.5 rounded-sm cursor-pointer" %>
+      <% end %>
+
+      <p class="text-center text-sm text-gray-500 mt-6">
+        Bạn đã có tài khoản?
+        <%= link_to "Đăng nhập", new_session_path, class: "text-[#ee4d2d] font-medium hover:underline" %>
+      </p>
     </div>
-
-    <div>
-      <%= form.label :email_address, "Email", class: "block text-sm font-medium text-gray-700" %>
-      <%= form.email_field :email_address, required: true,
-            class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
-    </div>
-
-    <div>
-      <%= form.label :password, "Mật khẩu", class: "block text-sm font-medium text-gray-700" %>
-      <%= form.password_field :password, required: true,
-            class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
-    </div>
-
-    <div>
-      <%= form.label :password_confirmation, "Nhập lại mật khẩu", class: "block text-sm font-medium text-gray-700" %>
-      <%= form.password_field :password_confirmation, required: true,
-            class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
-    </div>
-
-    <div>
-      <%= form.submit "Đăng ký", class: "w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-md" %>
-    </div>
-  <% end %>
-
-  <p class="mt-6 text-center text-sm text-gray-600">
-    Đã có tài khoản?
-    <%= link_to "Đăng nhập ngay", new_session_path, class: "text-blue-600 hover:underline font-medium" %>
-  </p>
+  </div>
 </div>
