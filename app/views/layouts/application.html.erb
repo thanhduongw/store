@@ -1,56 +1,99 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
   <head>
-    <title><%= content_for(:title) || "Store" %></title>
+    <title>Store - Mua sắm online</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Store">
-    <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+    <style>
+      :root {
+        --shopee-orange: #EE4D2D;
+        --shopee-orange-dark: #D73211;
+      }
+    </style>
+  </head>
 
-    <%= yield :head %>
-
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-    <%= link_to cart_path, class: "relative text-gray-700 hover:text-blue-600" do %>
-  <span>Giỏ hàng</span>
-    <% if current_cart.total_quantity > 0 %>
-      <span class="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-        <%= current_cart.total_quantity %>
-      </span>
-    <% end %>
-  <% end %>
-  <% if authenticated? && Current.user.admin? %>
-  <%= link_to "Admin", admin_root_path, class: "text-sm text-purple-600 hover:underline" %>
-<% end %>
-    <nav class="bg-white shadow-sm border-b">
-      <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        <%= link_to "Store", root_path, class: "text-xl font-bold text-gray-800" %>
-
-        <div class="flex items-center gap-4">
+  <body class="bg-gray-100 text-gray-800">
+    <!-- Top bar nhỏ -->
+    <div class="bg-white border-b text-xs text-gray-500">
+      <div class="max-w-7xl mx-auto px-4 py-1 flex justify-between">
+        <div>Kênh Người Bán | Tải ứng dụng | Kết nối</div>
+        <div class="flex gap-4">
           <% if authenticated? %>
-            <span class="text-sm text-gray-600">Xin chào, <%= Current.user.full_name %></span>
-            <%= button_to "Đăng xuất", session_path, method: :delete, class: "text-sm text-red-600 hover:underline" %>
+            <span>Xin chào, <%= Current.user.full_name %></span>
+            <% if Current.user.admin? %>
+              <%= link_to "Admin", admin_root_path, class: "hover:text-orange-600" %>
+            <% end %>
+            <%= button_to "Đăng xuất", session_path, method: :delete, class: "hover:text-orange-600" %>
           <% else %>
-            <%= link_to "Đăng nhập", new_session_path, class: "text-sm text-gray-700 hover:text-blue-600" %>
-            <%= link_to "Đăng ký", sign_up_path, class: "text-sm bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700" %>
+            <%= link_to "Đăng ký", sign_up_path, class: "hover:text-orange-600" %>
+            <span>|</span>
+            <%= link_to "Đăng nhập", new_session_path, class: "hover:text-orange-600" %>
           <% end %>
         </div>
       </div>
-    </nav>
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
-  </head>
+    </div>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
+    <!-- Header chính -->
+    <header class="bg-(--shopee-orange) text-white sticky top-0 z-50 shadow">
+      <div class="max-w-7xl mx-auto px-4 py-3">
+        <div class="flex items-center gap-8">
+          <!-- Logo -->
+          <%= link_to root_path, class: "text-2xl font-bold tracking-tight flex items-center gap-2" do %>
+            <span class="bg-white text-(--shopee-orange) px-2 py-1 rounded">S</span>
+            Store
+          <% end %>
+
+          <!-- Ô tìm kiếm -->
+          <div class="flex-1 max-w-3xl">
+            <form action="<%= products_path %>" method="get" class="flex">
+              <input type="text" name="q" placeholder="Tìm sản phẩm, thương hiệu và tên shop"
+                     class="w-full px-4 py-2.5 rounded-l text-gray-800 focus:outline-none">
+              <button type="submit" class="bg-(--shopee-orange-dark) px-6 rounded-r hover:bg-orange-700">
+                Tìm
+              </button>
+            </form>
+          </div>
+
+          <!-- Giỏ hàng -->
+          <%= link_to cart_path, class: "relative flex items-center gap-1 hover:opacity-90" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <span class="text-sm">Giỏ hàng</span>
+            <% if current_cart.total_quantity > 0 %>
+              <span class="absolute -top-2 -right-3 bg-white text-(--shopee-orange) text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                <%= current_cart.total_quantity %>
+              </span>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </header>
+
+    <!-- Flash messages -->
+    <% if notice.present? %>
+      <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 max-w-7xl mx-auto mt-4">
+        <%= notice %>
+      </div>
+    <% end %>
+    <% if alert.present? %>
+      <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 max-w-7xl mx-auto mt-4">
+        <%= alert %>
+      </div>
+    <% end %>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
       <%= yield %>
     </main>
+
+    <!-- Footer đơn giản -->
+    <footer class="bg-white border-t mt-12 py-8 text-sm text-gray-500">
+      <div class="max-w-7xl mx-auto px-4 text-center">
+        © 2026 Store. Giao diện lấy cảm hứng từ Shopee.
+      </div>
+    </footer>
   </body>
 </html>

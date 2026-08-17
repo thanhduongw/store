@@ -16,6 +16,9 @@ class Product < ApplicationRecord
   validates :status, inclusion: { in: STATUSES }
   validates :sku, uniqueness: true, allow_blank: true
 
+  # Validation ảnh upload
+  validate :acceptable_image
+
   # Scope tiện lợi
   scope :active, -> { where(status: "active") }
   scope :in_stock, -> { where("inventory_count > 0") }
@@ -25,7 +28,29 @@ class Product < ApplicationRecord
   end
 
   def discount_percentage
-    return 0 unless on_sale?
+    return 0 unless on_sale? && compare_at_price.to_f > 0
     (((compare_at_price - price) / compare_at_price) * 100).round
+  end
+
+  private
+
+  def acceptable_image
+    return unless featured_image.attached?
+
+    unless featured_image.blob.content_type.in?(
+      %w[image/jpeg image/png image/webp image/jpg]
+    )
+      errors.add(
+        :featured_image,
+        "chỉ chấp nhận ảnh JPEG, PNG hoặc WEBP"
+      )
+    end
+
+    if featured_image.blob.byte_size > 5.megabytes
+      errors.add(
+        :featured_image,
+        "kích thước không được vượt quá 5MB"
+      )
+    end
   end
 end

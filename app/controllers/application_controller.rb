@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::Base
   include Authentication
-
+  include Pagy::Method
   # Cho phép dùng current_cart ở cả Controller và View
   helper_method :current_cart
 

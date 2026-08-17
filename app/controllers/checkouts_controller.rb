@@ -8,25 +8,24 @@ class CheckoutsController < ApplicationController
     end
 
     @order = Order.new
-
-    # Nếu đã đăng nhập thì tự điền thông tin
     if authenticated?
-      @order.full_name = Current.user.full_name
+      @order.full_name = Current.user.full_name.presence
     end
   end
 
   def create
     @cart = current_cart
-    @order = Order.create_from_cart(@cart, order_params)
 
-    if authenticated?
-      @order.user = Current.user
-    end
-
-    if @order.save
-      @cart.clear!   # Xóa giỏ hàng sau khi đặt thành công
+    begin
+      @order = Order.create_from_cart!(
+        @cart,
+        order_params,
+        authenticated? ? Current.user : nil
+      )
       redirect_to order_path(@order), notice: "Đặt hàng thành công! Cảm ơn bạn."
-    else
+    rescue ActiveRecord::Rollback, ActiveRecord::RecordInvalid => e
+      @order = Order.new(order_params)
+      flash.now[:alert] = e.message.presence || "Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại."
       render :new, status: :unprocessable_entity
     end
   end

@@ -66,3 +66,5 @@ group :test do
 end
 
 gem "tailwindcss-rails", "~> 4.6"
+
+gem "pagy", "~> 43.6"

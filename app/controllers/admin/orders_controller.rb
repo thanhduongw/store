@@ -9,7 +9,14 @@ class Admin::OrdersController < Admin::BaseController
   end
 
   def update
-    if @order.update(order_params)
+    new_status = params[:order][:status]
+
+    unless @order.can_transition_to?(new_status)
+      redirect_to admin_order_path(@order), alert: "Không thể chuyển từ '#{@order.status}' sang '#{new_status}'."
+      return
+    end
+
+    if @order.update(status: new_status)
       redirect_to admin_order_path(@order), notice: "Cập nhật trạng thái đơn hàng thành công."
     else
       redirect_to admin_order_path(@order), alert: "Không thể cập nhật."
@@ -20,9 +27,5 @@ class Admin::OrdersController < Admin::BaseController
 
   def set_order
     @order = Order.find(params[:id])
-  end
-
-  def order_params
-    params.require(:order).permit(:status)
   end
 end

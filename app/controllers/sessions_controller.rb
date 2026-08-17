@@ -7,15 +7,36 @@ class SessionsController < ApplicationController
 
   def create
     if user = User.authenticate_by(params.permit(:email_address, :password))
+      # === MERGE GIỎ HÀNG ===
+      merge_guest_cart_to_user(user)
+
       start_new_session_for user
-      redirect_to after_authentication_url
+      redirect_to after_authentication_url, notice: "Đăng nhập thành công!"
     else
-      redirect_to new_session_path, alert: "Try another email address or password."
+      redirect_to new_session_path, alert: "Email hoặc mật khẩu không đúng."
     end
+  end
+
+  private
+
+  def merge_guest_cart_to_user(user)
+    return unless session[:cart_id]
+
+    guest_cart = Cart.find_by(id: session[:cart_id])
+    return unless guest_cart&.cart_items&.any?
+
+    user_cart = user.cart || user.create_cart
+
+    guest_cart.cart_items.each do |item|
+      user_cart.add_product(item.product, item.quantity)
+    end
+
+    guest_cart.destroy
+    session.delete(:cart_id)
   end
 
   def destroy
     terminate_session
-    redirect_to new_session_path, status: :see_other
+    redirect_to root_path, notice: "Bạn đã đăng xuất thành công.", status: :see_other
   end
 end

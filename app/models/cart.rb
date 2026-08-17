@@ -15,14 +15,21 @@ class Cart < ApplicationRecord
 
   # Thêm sản phẩm vào giỏ (nếu đã có thì tăng số lượng)
   def add_product(product, quantity = 1)
+    quantity = quantity.to_i
+    return false if quantity < 1
+    return false if product.inventory_count < 1
+
     current_item = cart_items.find_by(product: product)
 
     if current_item
-      current_item.quantity += quantity
-      current_item.save
+      new_qty = current_item.quantity + quantity
+      return false if product.inventory_count < new_qty
+      current_item.update!(quantity: new_qty)
     else
-      cart_items.create(product: product, quantity: quantity)
+      return false if product.inventory_count < quantity
+      cart_items.create!(product: product, quantity: quantity)
     end
+    true
   end
   def clear!
     cart_items.destroy_all

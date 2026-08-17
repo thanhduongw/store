@@ -1,49 +1,49 @@
-<div class="max-w-7xl mx-auto py-8 px-4">
-  <div class="flex justify-between items-center mb-8">
-    <h1 class="text-3xl font-bold">Sản phẩm</h1>
-    <%= link_to "Thêm sản phẩm mới", new_product_path, class: "bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" %>
-  </div>
+<div class="mb-6">
+  <h1 class="text-xl font-medium text-gray-700">Gợi ý hôm nay</h1>
+</div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-    <% @products.each do |product| %>
-      <div class="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+  <% @products.each do |product| %>
+    <%= link_to product_path(product), class: "bg-white rounded-sm shadow-sm hover:shadow-md transition group" do %>
+      <!-- Ảnh -->
+      <div class="relative aspect-square overflow-hidden">
         <% if product.featured_image.attached? %>
-          <%= image_tag product.featured_image.variant(resize_to_limit: [400, 400]), class: "w-full h-48 object-cover" %>
+          <%= image_tag product.featured_image.variant(resize_to_limit: [300, 300]),
+                class: "w-full h-full object-cover group-hover:scale-105 transition duration-300" %>
         <% else %>
-          <div class="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500">
-            Không có ảnh
+          <div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-sm">
+            No Image
           </div>
         <% end %>
 
-        <div class="p-4">
-          <h2 class="font-semibold text-lg mb-1">
-            <%= link_to product.name, product, class: "hover:text-blue-600" %>
-          </h2>
+        <% if product.on_sale? %>
+          <div class="absolute top-0 right-0 bg-[#EE4D2D] text-white text-xs font-bold px-1.5 py-0.5">
+            -<%= product.discount_percentage %>%
+          </div>
+        <% end %>
+      </div>
 
-          <div class="flex items-center gap-2 mb-2">
-            <span class="text-lg font-bold text-red-600">
-              <%= number_to_currency(product.price, unit: "₫", precision: 0) %>
+      <!-- Thông tin -->
+      <div class="p-2">
+        <h3 class="text-sm text-gray-800 line-clamp-2 h-10 mb-1">
+          <%= product.name %>
+        </h3>
+
+        <div class="flex items-baseline gap-1">
+          <span class="text-[#EE4D2D] font-medium">
+            ₫<%= number_with_delimiter(product.price.to_i) %>
+          </span>
+          <% if product.on_sale? %>
+            <span class="text-xs text-gray-400 line-through">
+              ₫<%= number_with_delimiter(product.compare_at_price.to_i) %>
             </span>
-            <% if product.on_sale? %>
-              <span class="text-sm text-gray-500 line-through">
-                <%= number_to_currency(product.compare_at_price, unit: "₫", precision: 0) %>
-              </span>
-              <span class="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded">
-                -<%= product.discount_percentage %>%
-              </span>
-            <% end %>
-          </div>
+          <% end %>
+        </div>
 
-          <p class="text-sm text-gray-600 mb-3">
-            Còn lại: <%= product.inventory_count %>
-          </p>
-
-          <div class="flex gap-2">
-            <%= link_to "Xem", product, class: "text-sm text-blue-600 hover:underline" %>
-            <%= link_to "Sửa", edit_product_path(product), class: "text-sm text-gray-600 hover:underline" %>
-          </div>
+        <div class="text-xs text-gray-400 mt-1">
+          Còn <%= product.inventory_count %>
         </div>
       </div>
     <% end %>
-  </div>
+  <% end %>
 </div>
