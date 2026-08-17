@@ -1,15 +1,9 @@
-<% content_for :title, "Giỏ hàng | Store" %>
-
-<div class="py-4">
-  <h1 class="text-lg font-medium text-gray-700 mb-4 flex items-center gap-2">
-    Giỏ Hàng
-    <span class="text-sm font-normal text-gray-400">(<%= @cart.total_quantity %> sản phẩm)</span>
-  </h1>
+<div class="py-6">
+  <h1 class="text-lg font-medium text-gray-700 mb-4">Giỏ Hàng (<%= @cart.total_quantity %> sản phẩm)</h1>
 
   <% if @cart.cart_items.any? %>
-    <div class="bg-white rounded-sm shadow-sm mb-3 overflow-hidden">
-      <!-- Header -->
-      <div class="hidden sm:grid grid-cols-12 gap-4 px-6 py-3 text-sm text-gray-400 bg-gray-50 border-b border-gray-100">
+    <div class="bg-white rounded-sm shadow-sm mb-4">
+      <div class="hidden sm:grid grid-cols-12 gap-4 px-6 py-4 text-xs text-gray-400 uppercase border-b">
         <div class="col-span-6">Sản phẩm</div>
         <div class="col-span-2 text-center">Đơn giá</div>
         <div class="col-span-2 text-center">Số lượng</div>
@@ -18,66 +12,59 @@
       </div>
 
       <% @cart.cart_items.each do |item| %>
-        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center px-4 sm:px-6 py-4 border-b border-gray-100 last:border-0">
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center px-6 py-5 border-b last:border-b-0">
           <div class="sm:col-span-6 flex items-center gap-4">
             <% if item.product.featured_image.attached? %>
-              <%= image_tag item.product.featured_image.variant(resize_to_limit: [100, 100]),
-                    class: "w-16 h-16 object-cover rounded-sm border border-gray-100" %>
+              <%= image_tag item.product.featured_image.variant(resize_to_limit: [70, 70]),
+                    alt: item.product.name,
+                    class: "w-16 h-16 object-cover rounded border border-gray-100" %>
             <% else %>
-              <div class="w-16 h-16 rounded-sm bg-gray-100 flex items-center justify-center text-[10px] text-gray-300">No img</div>
+              <div class="w-16 h-16 rounded bg-gray-100 flex items-center justify-center text-[10px] text-gray-400">Không ảnh</div>
             <% end %>
-            <div>
-              <%= link_to item.product.name, item.product, class: "text-sm text-gray-700 hover:text-[#ee4d2d] line-clamp-2 leading-snug" %>
-              <p class="text-xs text-gray-400 mt-0.5"><%= item.product.category&.name %></p>
-            </div>
+            <%= link_to item.product.name, item.product, class: "text-sm text-gray-700 hover:text-[#ee4d2d] line-clamp-2" %>
           </div>
 
-          <div class="sm:col-span-2 text-sm text-gray-700 sm:text-center font-medium">
-            ₫<%= number_with_delimiter(item.product.price.to_i, delimiter: '.') %>
+          <div class="sm:col-span-2 text-sm text-gray-600 sm:text-center">
+            <%= number_to_currency(item.product.price, unit: "₫", precision: 0, format: "%n%u") %>
           </div>
 
           <div class="sm:col-span-2 flex sm:justify-center">
             <%= form_with url: cart_item_path(item), method: :patch, class: "flex items-center border border-gray-300 rounded-sm" do %>
               <%= number_field_tag :quantity, item.quantity, min: 1, max: item.product.inventory_count,
-                    class: "w-12 h-8 text-center text-sm focus:outline-none [appearance:textfield] border-x border-gray-300",
+                    class: "w-16 h-8 text-center focus:outline-none [appearance:textfield]",
                     onchange: "this.form.requestSubmit()" %>
             <% end %>
           </div>
 
           <div class="sm:col-span-1 text-sm text-[#ee4d2d] font-medium sm:text-center">
-            ₫<%= number_with_delimiter(item.total_price.to_i, delimiter: '.') %>
+            <%= number_to_currency(item.total_price, unit: "₫", precision: 0, format: "%n%u") %>
           </div>
 
           <div class="sm:col-span-1 sm:text-center">
-            <%= button_to cart_item_path(item), method: :delete,
-                  data: { turbo_confirm: "Xóa sản phẩm này khỏi giỏ hàng?" },
-                  class: "text-gray-400 hover:text-[#ee4d2d] bg-transparent border-0 p-0 cursor-pointer text-sm" do %>
-              Xóa
-            <% end %>
+            <%= button_to "Xóa", cart_item_path(item), method: :delete,
+                  data: { turbo_confirm: "Bạn chắc chắn muốn xóa sản phẩm này?" },
+                  class: "text-sm text-gray-400 hover:text-[#ee4d2d] bg-transparent border-0 p-0 cursor-pointer" %>
           </div>
         </div>
       <% end %>
     </div>
 
-    <!-- Sticky bottom bar -->
-    <div class="sticky bottom-0 bg-white rounded-sm shadow-[0_-2px_10px_rgba(0,0,0,0.05)] px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-gray-100 z-40">
+    <div class="bg-white rounded-sm shadow-sm px-6 py-5 flex flex-col sm:flex-row justify-between items-center gap-4">
       <%= link_to "← Tiếp tục mua sắm", products_path, class: "text-sm text-gray-500 hover:text-[#ee4d2d]" %>
       <div class="flex items-center gap-6">
         <div class="text-right">
           <span class="text-sm text-gray-500">Tổng thanh toán: </span>
-          <span class="text-2xl text-[#ee4d2d] font-medium">
-            ₫<%= number_with_delimiter(@cart.total_price.to_i, delimiter: '.') %>
+          <span class="text-2xl text-[#ee4d2d] font-semibold">
+            <%= number_to_currency(@cart.total_price, unit: "₫", precision: 0, format: "%n%u") %>
           </span>
         </div>
-        <%= link_to "Mua Hàng", new_checkout_path,
-              class: "bg-[#ee4d2d] hover:bg-[#d9431f] text-white font-medium px-10 py-3 rounded-sm transition-colors" %>
+        <%= link_to "Mua Hàng", new_checkout_path, class: "bg-[#ee4d2d] hover:bg-[#d9431f] text-white font-medium px-10 py-3 rounded-sm" %>
       </div>
     </div>
   <% else %>
-    <div class="bg-white rounded-sm shadow-sm py-24 text-center">
-      <svg class="w-20 h-20 mx-auto mb-4 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+    <div class="bg-white rounded-sm shadow-sm py-20 text-center">
       <p class="text-gray-500 mb-6">Giỏ hàng của bạn còn trống</p>
-      <%= link_to "Mua Sắm Ngay", products_path, class: "bg-[#ee4d2d] hover:bg-[#d9431f] text-white font-medium px-8 py-3 rounded-sm transition-colors" %>
+      <%= link_to "Mua Sắm Ngay", products_path, class: "bg-[#ee4d2d] hover:bg-[#d9431f] text-white font-medium px-8 py-3 rounded-sm" %>
     </div>
   <% end %>
 </div>

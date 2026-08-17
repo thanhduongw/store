@@ -1,10 +1,6 @@
 class SignUpsController < ApplicationController
-  # Nếu trong Authentication concern bạn có method `unauthenticated_access_only` thì giữ nguyên.
-  # Nếu KHÔNG có, hãy thay bằng 2 dòng sau:
-  # allow_unauthenticated_access
-  # before_action :redirect_if_authenticated, if: :authenticated?
-
-  unauthenticated_access_only
+  allow_unauthenticated_access
+  before_action :redirect_if_authenticated, if: :authenticated?
 
   rate_limit to: 10, within: 3.minutes, only: :create,
              with: -> { redirect_to sign_up_path, alert: "Bạn thao tác quá nhanh. Vui lòng thử lại sau." }
@@ -28,5 +24,9 @@ class SignUpsController < ApplicationController
 
   def sign_up_params
     params.require(:user).permit(:first_name, :last_name, :email_address, :password, :password_confirmation)
+  end
+
+  def redirect_if_authenticated
+    redirect_to root_path, notice: "Bạn đã đăng nhập rồi."
   end
 end

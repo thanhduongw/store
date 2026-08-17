@@ -2,7 +2,10 @@ class Admin::ProductsController < Admin::BaseController
   before_action :set_product, only: %i[show edit update destroy]
 
   def index
-    @products = Product.includes(:category).order(created_at: :desc)
+    scope = Product.includes(:category, featured_image_attachment: :blob).order(created_at: :desc)
+    scope = scope.where("name LIKE ? OR sku LIKE ?", "%#{params[:q]}%", "%#{params[:q]}%") if params[:q].present?
+    scope = scope.where(status: params[:status]) if params[:status].present?
+    @pagy, @products = pagy(:offset, scope, limit: 20)
   end
 
   def show
@@ -26,6 +29,8 @@ class Admin::ProductsController < Admin::BaseController
   end
 
   def update
+    @product.featured_image.purge if params.dig(:product, :remove_featured_image) == "1"
+
     if @product.update(product_params)
       redirect_to admin_product_path(@product), notice: "Sản phẩm đã được cập nhật."
     else

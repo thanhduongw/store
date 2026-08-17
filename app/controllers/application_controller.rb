@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::Base
   include Authentication
-  include Pagy::Method          # Sửa: Pagy::Method → Pagy::Backend
+  include Pagy::Method
 
   helper_method :current_cart
 

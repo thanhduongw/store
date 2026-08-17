@@ -1,34 +1,43 @@
-<%# app/views/admin/orders/index.html.erb %>
-<h1 class="text-2xl font-bold mb-6">Quản lý đơn hàng</h1>
+<h1 class="text-xl font-semibold text-gray-800 mb-4">Quản lý đơn hàng</h1>
 
-<div class="bg-white shadow rounded-lg overflow-hidden">
-  <table class="min-w-full divide-y divide-gray-200">
+<%= form_with url: admin_orders_path, method: :get, class: "bg-white rounded-sm shadow-sm p-4 mb-4 flex flex-wrap gap-3 items-center" do |form| %>
+  <%= form.select :status, options_for_select([ [ "Tất cả trạng thái", "" ] ] + Order::STATUSES.map { |s| [ s.humanize, s ] }, params[:status]),
+        {}, class: "rounded-sm border-gray-300 text-sm focus:border-[#ee4d2d] focus:ring-[#ee4d2d]" %>
+  <%= form.submit "Lọc", class: "bg-gray-100 hover:bg-gray-200 text-sm px-4 py-2 rounded-sm cursor-pointer" %>
+<% end %>
+
+<div class="bg-white shadow-sm rounded-sm overflow-hidden">
+  <table class="min-w-full divide-y divide-gray-100">
     <thead class="bg-gray-50">
       <tr>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã đơn</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Khách hàng</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tổng tiền</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày đặt</th>
-        <th class="px-6 py-3"></th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã đơn</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Khách hàng</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tổng tiền</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày đặt</th>
+        <th class="px-4 py-3"></th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-gray-200">
+    <tbody class="divide-y divide-gray-100">
       <% @orders.each do |order| %>
-        <tr>
-          <td class="px-6 py-4 font-medium">#<%= order.id %></td>
-          <td class="px-6 py-4"><%= order.full_name %></td>
-          <td class="px-6 py-4"><%= number_to_currency(order.total, unit: "₫", precision: 0) %></td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
-              <%= order.status %>
+        <tr class="hover:bg-gray-50">
+          <td class="px-4 py-3 font-medium text-gray-800">#<%= order.id %></td>
+          <td class="px-4 py-3 text-sm text-gray-600"><%= order.full_name %></td>
+          <td class="px-4 py-3 text-sm text-[#ee4d2d] font-medium"><%= number_to_currency(order.total, unit: "₫", precision: 0) %></td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-1 text-xs rounded-full <%= order.badge_class %>">
+              <%= order.status.humanize %>
             </span>
           </td>
-          <td class="px-6 py-4 text-sm text-gray-500"><%= order.created_at.strftime("%d/%m/%Y %H:%M") %></td>
-          <td class="px-6 py-4 text-right">
-            <%= link_to "Xem", admin_order_path(order), class: "text-blue-600 hover:underline" %>
+          <td class="px-4 py-3 text-sm text-gray-500"><%= order.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+          <td class="px-4 py-3 text-right">
+            <%= link_to "Xem", admin_order_path(order), class: "text-[#ee4d2d] hover:underline" %>
           </td>
         </tr>
+      <% end %>
+
+      <% if @orders.empty? %>
+        <tr><td colspan="6" class="px-4 py-16 text-center text-gray-400 text-sm">Không có đơn hàng nào.</td></tr>
       <% end %>
     </tbody>
   </table>
