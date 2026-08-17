@@ -1,0 +1,65 @@
+<%= form_with(model: product, class: "space-y-6") do |form| %>
+  <% if product.errors.any? %>
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+      <h3 class="font-medium"><%= pluralize(product.errors.count, "lỗi") %> ngăn không cho lưu:</h3>
+      <ul class="mt-2 list-disc list-inside text-sm">
+        <% product.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :name, "Tên sản phẩm", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.text_field :name, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+  </div>
+
+  <div>
+    <%= form.label :description, "Mô tả", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.text_area :description, rows: 5, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <%= form.label :price, "Giá bán", class: "block text-sm font-medium text-gray-700" %>
+      <%= form.number_field :price, step: 0.01, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+    </div>
+
+    <div>
+      <%= form.label :compare_at_price, "Giá gốc (để hiện giảm giá)", class: "block text-sm font-medium text-gray-700" %>
+      <%= form.number_field :compare_at_price, step: 0.01, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <%= form.label :inventory_count, "Số lượng tồn kho", class: "block text-sm font-medium text-gray-700" %>
+      <%= form.number_field :inventory_count, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+    </div>
+
+    <div>
+      <%= form.label :sku, "Mã SKU", class: "block text-sm font-medium text-gray-700" %>
+      <%= form.text_field :sku, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+    </div>
+  </div>
+
+  <div>
+    <%= form.label :status, "Trạng thái", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.select :status, Product::STATUSES.map { |s| [s.humanize, s] }, {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+  </div>
+
+  <div>
+    <%= form.label :category_id, "Danh mục", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.collection_select :category_id, Category.all, :id, :name, { include_blank: "Chọn danh mục" }, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+  </div>
+
+  <div>
+    <%= form.label :featured_image, "Ảnh sản phẩm", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.file_field :featured_image, accept: "image/*", class: "mt-1 block w-full" %>
+  </div>
+
+  <div class="pt-4">
+    <%= form.submit class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md" %>
+  </div>
+<% end %>

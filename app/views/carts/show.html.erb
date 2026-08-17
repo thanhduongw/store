@@ -1,0 +1,68 @@
+<div class="max-w-5xl mx-auto py-10 px-4">
+  <h1 class="text-3xl font-bold mb-8">Giỏ hàng của bạn</h1>
+
+  <% if @cart.cart_items.any? %>
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Sản phẩm</th>
+            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Đơn giá</th>
+            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Số lượng</th>
+            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Thành tiền</th>
+            <th class="px-6 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <% @cart.cart_items.each do |item| %>
+            <tr>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-4">
+                  <% if item.product.featured_image.attached? %>
+                    <%= image_tag item.product.featured_image.variant(resize_to_limit: [80, 80]), class: "rounded" %>
+                  <% end %>
+                  <div>
+                    <%= link_to item.product.name, item.product, class: "font-medium hover:text-blue-600" %>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <%= number_to_currency(item.product.price, unit: "₫", precision: 0) %>
+              </td>
+              <td class="px-6 py-4">
+                <%= form_with url: cart_item_path(item), method: :patch, class: "flex items-center gap-2" do %>
+                  <%= number_field_tag :quantity, item.quantity, min: 1, class: "w-20 rounded border-gray-300" %>
+                  <%= submit_tag "Cập nhật", class: "text-sm text-blue-600 hover:underline" %>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 font-medium">
+                <%= number_to_currency(item.total_price, unit: "₫", precision: 0) %>
+              </td>
+              <td class="px-6 py-4">
+                <%= button_to "Xóa", cart_item_path(item), method: :delete,
+                      data: { turbo_confirm: "Bạn chắc chắn muốn xóa?" },
+                      class: "text-red-600 hover:underline text-sm" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-8 flex justify-between items-center">
+      <div class="text-xl font-bold">
+        Tổng cộng: <%= number_to_currency(@cart.total_price, unit: "₫", precision: 0) %>
+      </div>
+
+      <div class="flex gap-4">
+        <%= link_to "Tiếp tục mua sắm", products_path, class: "text-blue-600 hover:underline" %>
+        <%= link_to "Tiến hành thanh toán", new_checkout_path, class: "bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 font-medium" %>
+      </div>
+    </div>
+  <% else %>
+    <div class="text-center py-16">
+      <p class="text-xl text-gray-600 mb-6">Giỏ hàng của bạn đang trống</p>
+      <%= link_to "Mua sắm ngay", products_path, class: "bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700" %>
+    </div>
+  <% end %>
+</div>

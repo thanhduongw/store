@@ -1,0 +1,59 @@
+<div class="max-w-3xl mx-auto py-10 px-4">
+  <h1 class="text-3xl font-bold mb-8">Thanh toán</h1>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Form thông tin giao hàng -->
+    <div class="lg:col-span-2">
+      <%= form_with model: @order, url: checkout_path, class: "space-y-5" do |form| %>
+        <% if @order.errors.any? %>
+          <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <% @order.errors.full_messages.each do |msg| %>
+              <p><%= msg %></p>
+            <% end %>
+          </div>
+        <% end %>
+
+        <div>
+          <%= form.label :full_name, "Họ và tên người nhận", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_field :full_name, required: true, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+        </div>
+
+        <div>
+          <%= form.label :phone, "Số điện thoại", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.telephone_field :phone, required: true, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+        </div>
+
+        <div>
+          <%= form.label :address, "Địa chỉ giao hàng", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_area :address, rows: 3, required: true, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+        </div>
+
+        <div>
+          <%= form.label :note, "Ghi chú (tùy chọn)", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_area :note, rows: 2, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+        </div>
+
+        <div class="pt-4">
+          <%= form.submit "Xác nhận đặt hàng", class: "w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded-md text-lg" %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Tóm tắt đơn hàng -->
+    <div class="bg-gray-50 p-6 rounded-lg h-fit">
+      <h2 class="text-lg font-bold mb-4">Đơn hàng của bạn</h2>
+
+      <% @cart.cart_items.each do |item| %>
+        <div class="flex justify-between text-sm mb-3">
+          <span><%= item.product.name %> × <%= item.quantity %></span>
+          <span><%= number_to_currency(item.total_price, unit: "₫", precision: 0) %></span>
+        </div>
+      <% end %>
+
+      <div class="border-t pt-4 mt-4 flex justify-between font-bold text-lg">
+        <span>Tổng cộng</span>
+        <span><%= number_to_currency(@cart.total_price, unit: "₫", precision: 0) %></span>
+      </div>
+    </div>
+  </div>
+</div>
