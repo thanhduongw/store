@@ -2,10 +2,13 @@ class Admin::OrdersController < Admin::BaseController
   before_action :set_order, only: %i[show update]
 
   def index
-    @orders = Order.includes(:user).order(created_at: :desc)
+    scope = Order.includes(:user).order(created_at: :desc)
+    scope = scope.where(status: params[:status]) if params[:status].present?
+    @orders = scope
   end
 
   def show
+    @order_items = @order.order_items.includes(product: { featured_image_attachment: :blob })
   end
 
   def update
