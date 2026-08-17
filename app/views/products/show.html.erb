@@ -1,86 +1,129 @@
-<div class="py-4 space-y-3">
-  <div class="bg-white rounded-sm px-4 py-2.5 text-sm text-gray-500 flex items-center gap-2 shadow-sm">
-    <%= link_to "Trang chủ", root_path, class: "hover:text-[#ee4d2d]" %>
-    <span>›</span>
-    <span class="text-gray-700"><%= @product.category&.name || "Sản phẩm" %></span>
-    <span>›</span>
-    <span class="text-gray-400 truncate"><%= @product.name %></span>
-  </div>
+<% content_for :title, "#{@product.name} | Store" %>
 
-  <div class="bg-white rounded-sm shadow-sm p-4 md:p-6 grid grid-cols-1 md:grid-cols-12 gap-8">
+<!-- Breadcrumb -->
+<div class="py-3">
+  <div class="flex items-center gap-2 text-sm text-gray-500 flex-wrap">
+    <%= link_to "Trang chủ", root_path, class: "hover:text-[#ee4d2d]" %>
+    <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    <span class="text-gray-700"><%= @product.category&.name || "Sản phẩm" %></span>
+    <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    <span class="text-gray-400 truncate max-w-[200px]"><%= @product.name %></span>
+  </div>
+</div>
+
+<div class="bg-white rounded-sm shadow-sm p-4 md:p-6">
+  <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
+    <!-- Ảnh -->
     <div class="md:col-span-5">
-      <div class="aspect-square bg-gray-50 rounded overflow-hidden border border-gray-100">
+      <div class="aspect-square bg-gray-50 rounded-sm overflow-hidden border border-gray-100 relative group">
         <% if @product.featured_image.attached? %>
-          <%= image_tag @product.featured_image.variant(resize_to_limit: [600, 600]), class: "w-full h-full object-contain" %>
+          <%= image_tag @product.featured_image.variant(resize_to_limit: [800, 800]),
+                class: "w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" %>
         <% else %>
-          <div class="w-full h-full flex items-center justify-center text-gray-400">Không có ảnh</div>
+          <div class="w-full h-full flex items-center justify-center text-gray-300">
+            <svg class="w-20 h-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          </div>
         <% end %>
       </div>
     </div>
 
+    <!-- Info -->
     <div class="md:col-span-7">
-      <h1 class="text-xl font-medium text-gray-800 mb-2"><%= @product.name %></h1>
+      <div class="flex items-start gap-2 mb-2">
+        <span class="bg-[#ee4d2d] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm mt-1 shrink-0">Yêu thích</span>
+        <h1 class="text-xl md:text-2xl font-medium text-gray-900 leading-snug"><%= @product.name %></h1>
+      </div>
 
       <% if @product.sku.present? %>
         <p class="text-xs text-gray-400 mb-3">SKU: <%= @product.sku %></p>
       <% end %>
 
-      <div class="bg-gray-50 rounded-md px-4 py-3 flex items-center gap-3 mb-4 flex-wrap">
+      <!-- Rating bar giả lập Shopee -->
+      <div class="flex items-center gap-4 mb-4 text-sm">
+        <div class="flex items-center gap-1 border-r border-gray-200 pr-4">
+          <span class="text-[#ee4d2d] border-b border-[#ee4d2d]">4.9</span>
+          <div class="flex">
+            <% 5.times do %><svg class="w-3.5 h-3.5 text-[#ee4d2d] fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><% end %>
+          </div>
+        </div>
+        <div class="border-r border-gray-200 pr-4">
+          <span class="text-gray-800 border-b border-gray-800"><%= @product.sold_count %></span>
+          <span class="text-gray-500">Đã bán</span>
+        </div>
+        <div>
+          <span class="text-gray-500">Kho: <%= @product.inventory_count %></span>
+        </div>
+      </div>
+
+      <!-- Price box -->
+      <div class="bg-gray-50 rounded-sm px-5 py-4 flex items-baseline gap-3 mb-5 flex-wrap">
         <% if @product.on_sale? %>
-          <span class="text-gray-400 line-through text-base">
-            <%= number_to_currency(@product.compare_at_price, unit: "₫", precision: 0, format: "%n%u") %>
+          <span class="text-gray-400 line-through text-lg">
+            ₫<%= number_with_delimiter(@product.compare_at_price.to_i, delimiter: '.') %>
           </span>
         <% end %>
-        <span class="text-[#ee4d2d] text-3xl font-semibold">
-          <%= number_to_currency(@product.price, unit: "₫", precision: 0, format: "%n%u") %>
+        <span class="text-[#ee4d2d] text-3xl md:text-4xl font-medium">
+          <span class="text-xl align-top">₫</span><%= number_with_delimiter(@product.price.to_i, delimiter: '.') %>
         </span>
         <% if @product.on_sale? %>
-          <span class="bg-[#ee4d2d] text-white text-xs font-bold px-1.5 py-0.5 rounded-sm">
-            -<%= @product.discount_percentage %>%
+          <span class="bg-[#ee4d2d] text-white text-xs font-bold px-2 py-1 rounded-sm">
+            <%= @product.discount_percentage %>% GIẢM
           </span>
         <% end %>
       </div>
 
-      <div class="flex items-center gap-4 text-sm text-gray-500 mb-6 flex-wrap">
-        <span>Danh mục: <span class="text-gray-700"><%= @product.category&.name || "Chưa phân loại" %></span></span>
-        <span class="w-px h-4 bg-gray-200"></span>
-        <span>Kho: <span class="text-gray-700"><%= @product.inventory_count %> sản phẩm</span></span>
+      <!-- Shipping info -->
+      <div class="space-y-3 text-sm mb-6">
+        <div class="flex gap-4">
+          <span class="text-gray-400 w-20 shrink-0">Vận chuyển</span>
+          <span class="text-gray-700">Miễn phí vận chuyển</span>
+        </div>
+        <div class="flex gap-4">
+          <span class="text-gray-400 w-20 shrink-0">Danh mục</span>
+          <span class="text-gray-700"><%= @product.category&.name || "Chưa phân loại" %></span>
+        </div>
       </div>
 
+      <!-- Add to cart -->
       <% if @product.inventory_count > 0 %>
-        <%= form_with url: cart_items_path, method: :post do %>
+        <%= form_with url: cart_items_path, method: :post, class: "space-y-4" do %>
           <%= hidden_field_tag :product_id, @product.id %>
-          <div class="flex items-center gap-4 mb-6 flex-wrap">
-            <span class="text-sm text-gray-600">Số lượng</span>
-            <div class="flex items-center border border-gray-300 rounded-sm">
-              <button type="button"
-                      onclick="const i=this.nextElementSibling; i.stepDown();"
-                      class="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-50">−</button>
+
+          <div class="flex items-center gap-6 flex-wrap">
+            <span class="text-sm text-gray-500">Số lượng</span>
+            <div class="flex items-center">
+              <button type="button" onclick="const i=this.nextElementSibling;i.stepDown();"
+                      class="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-l-sm text-gray-600 hover:bg-gray-50 text-lg select-none">−</button>
               <%= number_field_tag :quantity, 1, min: 1, max: @product.inventory_count,
-                    class: "w-14 h-8 text-center border-x border-gray-300 focus:outline-none [appearance:textfield]" %>
-              <button type="button"
-                      onclick="const i=this.previousElementSibling; i.stepUp();"
-                      class="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-50">+</button>
+                    class: "w-14 h-8 text-center border-y border-gray-300 focus:outline-none text-sm [appearance:textfield]" %>
+              <button type="button" onclick="const i=this.previousElementSibling;i.stepUp();"
+                      class="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-r-sm text-gray-600 hover:bg-gray-50 text-lg select-none">+</button>
+              <span class="ml-4 text-sm text-gray-400"><%= @product.inventory_count %> sản phẩm có sẵn</span>
             </div>
-            <span class="text-xs text-gray-400"><%= @product.inventory_count %> sản phẩm có sẵn</span>
           </div>
-          <%= submit_tag "Thêm Vào Giỏ Hàng",
-                class: "bg-[#ee4d2d] hover:bg-[#d9431f] text-white font-medium px-8 py-3 rounded-sm cursor-pointer" %>
+
+          <div class="flex gap-3 pt-2">
+            <%= submit_tag "Thêm Vào Giỏ Hàng",
+                  class: "bg-[#ee4d2d]/10 hover:bg-[#ee4d2d]/20 text-[#ee4d2d] border border-[#ee4d2d] font-medium px-8 py-3 rounded-sm transition-colors cursor-pointer" %>
+            <%= submit_tag "Mua Ngay",
+                  class: "bg-[#ee4d2d] hover:bg-[#d9431f] text-white font-medium px-10 py-3 rounded-sm transition-colors cursor-pointer" %>
+          </div>
         <% end %>
       <% else %>
-        <div class="mb-6">
-          <span class="inline-block bg-gray-100 text-gray-500 font-medium px-6 py-3 rounded-sm">Sản phẩm tạm hết hàng</span>
+        <div class="py-3">
+          <span class="inline-block bg-gray-100 text-gray-400 font-medium px-8 py-3 rounded-sm cursor-not-allowed">Sản phẩm tạm hết hàng</span>
         </div>
       <% end %>
-
-      <%= link_to "← Quay lại danh sách sản phẩm", products_path, class: "text-sm text-gray-500 hover:text-[#ee4d2d]" %>
     </div>
   </div>
+</div>
 
-  <div class="bg-white rounded-sm shadow-sm p-4 md:p-6">
-    <h2 class="text-base font-semibold text-gray-800 uppercase mb-4 pb-3 border-b">Mô tả sản phẩm</h2>
-    <div class="text-sm text-gray-600 leading-relaxed">
-      <%= simple_format(@product.description.presence || "Chưa có mô tả cho sản phẩm này.") %>
-    </div>
+<!-- Description -->
+<div class="bg-white rounded-sm shadow-sm p-4 md:p-6 mt-3">
+  <div class="bg-gray-50 px-4 py-3 rounded-sm mb-4">
+    <h2 class="text-base font-medium text-gray-800 uppercase tracking-wide">Mô tả sản phẩm</h2>
+  </div>
+  <div class="text-sm text-gray-600 leading-7 px-2">
+    <%= simple_format(@product.description.presence || "Chưa có mô tả cho sản phẩm này.") %>
   </div>
 </div>

@@ -9,11 +9,11 @@ class OrdersController < ApplicationController
 
   def set_order
     @order = if Current.user.admin?
-               Order.find(params[:id])
+               Order.find_by(id: params[:id])
     else
-               Current.user.orders.find(params[:id])
+               Current.user.orders.find_by(id: params[:id])
     end
-  rescue ActiveRecord::RecordNotFound
-    redirect_to root_path, alert: "Không tìm thấy đơn hàng."
+
+    redirect_to root_path, alert: "Không tìm thấy đơn hàng." unless @order
   end
 end
