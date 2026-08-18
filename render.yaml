@@ -5,10 +5,6 @@ services:
     branch: feature/fix-ecommerce
     plan: free
     healthCheckPath: /up
-    disk:
-      name: sqlite-storage
-      mountPath: /rails/storage
-      sizeGB: 1
     envVars:
       - key: RAILS_MASTER_KEY
         sync: false
