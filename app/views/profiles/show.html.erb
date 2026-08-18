@@ -1,0 +1,65 @@
+<div class="py-8 max-w-4xl mx-auto">
+  <h1 class="text-xl font-semibold text-gray-800 mb-6">Tài Khoản Của Tôi</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Thông tin cá nhân -->
+    <div class="md:col-span-1">
+      <div class="bg-white rounded-sm shadow-sm p-6 text-center">
+        <div class="w-20 h-20 rounded-full bg-[#ee4d2d] flex items-center justify-center mx-auto mb-3">
+          <span class="text-white text-2xl font-bold"><%= @user.first_name[0].upcase %></span>
+        </div>
+        <h2 class="font-semibold text-gray-800 text-lg"><%= @user.full_name %></h2>
+        <p class="text-sm text-gray-500 mt-1"><%= @user.email_address %></p>
+        <%= link_to "Chỉnh sửa thông tin", edit_profile_path,
+              class: "mt-4 inline-block text-sm text-[#ee4d2d] border border-[#ee4d2d] px-4 py-1.5 rounded-sm hover:bg-[#ee4d2d] hover:text-white transition-colors" %>
+      </div>
+
+      <div class="bg-white rounded-sm shadow-sm p-4 mt-4 space-y-1">
+        <%= link_to orders_path, class: "flex items-center gap-3 px-2 py-2.5 text-sm text-gray-600 hover:text-[#ee4d2d] hover:bg-orange-50 rounded" do %>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          Đơn hàng của tôi
+        <% end %>
+        <%= link_to edit_profile_path, class: "flex items-center gap-3 px-2 py-2.5 text-sm text-gray-600 hover:text-[#ee4d2d] hover:bg-orange-50 rounded" do %>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          Thông tin cá nhân
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Đơn hàng gần đây -->
+    <div class="md:col-span-2">
+      <div class="bg-white rounded-sm shadow-sm p-6">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b">
+          <h3 class="font-semibold text-gray-800">Đơn Hàng Gần Đây</h3>
+          <%= link_to "Xem tất cả", orders_path, class: "text-sm text-[#ee4d2d] hover:underline" %>
+        </div>
+
+        <% if @recent_orders.empty? %>
+          <p class="text-gray-400 text-sm text-center py-6">Bạn chưa có đơn hàng nào.</p>
+        <% else %>
+          <div class="space-y-3">
+            <% @recent_orders.each do |order| %>
+              <div class="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
+                <div>
+                  <p class="text-sm font-medium text-gray-700">Đơn #<%= order.id %></p>
+                  <p class="text-xs text-gray-400 mt-0.5"><%= order.created_at.strftime("%d/%m/%Y") %> · <%= order.order_items.count %> sản phẩm</p>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="text-xs px-2 py-0.5 rounded-full <%= order.badge_class %>"><%= order.status_label %></span>
+                  <span class="text-sm font-semibold text-[#ee4d2d]">
+                    <%= number_to_currency(order.total, unit: "₫", precision: 0, format: "%n%u") %>
+                  </span>
+                  <%= link_to "Chi tiết", order_path(order), class: "text-xs text-gray-500 hover:text-[#ee4d2d] hover:underline" %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

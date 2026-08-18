@@ -3,7 +3,20 @@
 one:
   email_address: one@example.com
   password_digest: <%= password_digest %>
+  first_name: Nguyễn
+  last_name: Văn A
+  admin: false
 
 two:
   email_address: two@example.com
   password_digest: <%= password_digest %>
+  first_name: Trần
+  last_name: Thị B
+  admin: false
+
+admin:
+  email_address: admin@example.com
+  password_digest: <%= password_digest %>
+  first_name: Admin
+  last_name: User
+  admin: true

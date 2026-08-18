@@ -1,0 +1,113 @@
+<% content_for :title, "#{@category.name} | Store" %>
+
+<div class="py-4">
+  <div class="bg-white rounded-sm px-4 py-2.5 mb-4 text-sm text-gray-500 flex items-center gap-2 shadow-sm">
+    <%= link_to "Trang chủ", root_path, class: "hover:text-[#ee4d2d]" %>
+    <span>›</span>
+    <%= link_to "Danh mục", categories_path, class: "hover:text-[#ee4d2d]" %>
+    <span>›</span>
+    <span class="text-gray-700"><%= @category.name %></span>
+  </div>
+
+  <div class="flex gap-3 items-start">
+    <!-- Filter sidebar (desktop) -->
+    <div class="hidden lg:block w-44 shrink-0">
+      <div class="bg-white rounded-sm shadow-sm p-4">
+        <h3 class="font-medium text-sm text-gray-700 mb-3">Bộ lọc tìm kiếm</h3>
+        <%= form_with url: category_path(@category), method: :get do |f| %>
+          <%= hidden_field_tag :sort, params[:sort] %>
+          <p class="text-xs text-gray-500 mb-2 uppercase tracking-wide">Khoảng giá (₫)</p>
+          <div class="space-y-2 mb-3">
+            <%= f.number_field :min_price, value: params[:min_price], placeholder: "Giá từ",
+                  class: "w-full rounded-sm border border-gray-300 px-2 py-1.5 text-xs focus:outline-none focus:border-[#ee4d2d]" %>
+            <%= f.number_field :max_price, value: params[:max_price], placeholder: "Giá đến",
+                  class: "w-full rounded-sm border border-gray-300 px-2 py-1.5 text-xs focus:outline-none focus:border-[#ee4d2d]" %>
+          </div>
+          <%= f.submit "Áp dụng", class: "w-full bg-[#ee4d2d] hover:bg-[#d9431f] text-white text-xs py-2 rounded-sm cursor-pointer" %>
+        <% end %>
+        <% if params[:min_price].present? || params[:max_price].present? %>
+          <%= link_to "Xóa bộ lọc", category_path(@category, sort: params[:sort]),
+                class: "block text-center text-xs text-gray-400 hover:text-[#ee4d2d] mt-2" %>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Product area -->
+    <div class="flex-1 min-w-0">
+      <!-- Sort bar -->
+      <div class="bg-white rounded-sm shadow-sm px-4 py-2.5 mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div class="text-xs text-gray-500">
+          <span class="font-medium text-gray-700"><%= @category.name %></span>
+          — <%= @pagy.count %> sản phẩm
+        </div>
+        <div class="flex items-center gap-1 flex-wrap">
+          <span class="text-xs text-gray-500 mr-1 hidden sm:inline">Sắp xếp:</span>
+          <% [["Mới nhất", ""], ["Giá thấp", "price_asc"], ["Giá cao", "price_desc"], ["Bán chạy", "most_sold"]].each do |label, value| %>
+            <%= link_to label,
+                  category_path(@category, sort: value, min_price: params[:min_price], max_price: params[:max_price]),
+                  class: "px-3 py-1.5 text-xs rounded-sm #{(params[:sort].to_s == value) ? 'bg-[#ee4d2d] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
+          <% end %>
+        </div>
+      </div>
+
+      <% if @products.any? %>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+          <% @products.each do |product| %>
+            <%= link_to product_path(product),
+                  class: "bg-white rounded-sm shadow-sm hover:shadow-lg transition-shadow duration-200 overflow-hidden group" do %>
+              <div class="relative aspect-square bg-gray-100 overflow-hidden">
+                <% if product.images.attached? %>
+                  <%= image_tag product.images.first,
+                        alt: product.name,
+                        class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200",
+                        loading: "lazy" %>
+                <% else %>
+                  <div class="w-full h-full flex items-center justify-center text-gray-300">
+                    <svg class="w-10 h-10 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                <% end %>
+                <% if product.on_sale? %>
+                  <span class="absolute top-0 right-0 bg-[#ffce3d] text-[#ee4d2d] text-[10px] font-bold px-1.5 py-1">
+                    -<%= product.discount_percentage %>%
+                  </span>
+                <% end %>
+                <% if product.inventory_count == 0 %>
+                  <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <span class="text-white text-xs font-semibold border border-white px-2 py-1 rounded">Hết hàng</span>
+                  </div>
+                <% end %>
+              </div>
+              <div class="p-2.5">
+                <p class="text-sm text-gray-800 line-clamp-2 min-h-10 leading-tight"><%= product.name %></p>
+                <div class="mt-2 flex items-baseline gap-1.5 flex-wrap">
+                  <span class="text-[#ee4d2d] font-medium">
+                    <%= number_to_currency(product.price, unit: "₫", precision: 0, format: "%n%u") %>
+                  </span>
+                  <% if product.on_sale? %>
+                    <span class="text-gray-400 text-xs line-through">
+                      <%= number_to_currency(product.compare_at_price, unit: "₫", precision: 0, format: "%n%u") %>
+                    </span>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="bg-white rounded-sm shadow-sm py-20 text-center text-gray-400">
+          <p>Không có sản phẩm nào trong danh mục này.</p>
+          <%= link_to "Xem tất cả sản phẩm", products_path, class: "text-[#ee4d2d] hover:underline text-sm mt-2 inline-block" %>
+        </div>
+      <% end %>
+
+      <% if @pagy && @pagy.pages > 1 %>
+        <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
+          <p class="text-gray-500">Hiển thị <%= @pagy.from %>–<%= @pagy.to %> / <%= @pagy.count %> sản phẩm</p>
+          <nav class="flex items-center gap-1"><%== @pagy.series_nav %></nav>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

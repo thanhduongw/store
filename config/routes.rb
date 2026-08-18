@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  # Health check (Render, load balancers, uptime monitors)
+  get "up" => "rails/health#show", as: :rails_health_check
+
   # Trang chủ
   root "products#index"
 
@@ -15,9 +18,16 @@ Rails.application.routes.draw do
   resource :cart, only: [ :show ]
   resources :cart_items, only: [ :create, :update, :destroy ]
 
+  # Tài khoản
+  resource :profile, only: [ :show, :edit, :update ]
+
   # Thanh toán & Đơn hàng
   resource :checkout, only: [ :new, :create ]
-  resources :orders, only: [ :show ]
+  resources :orders, only: [ :index, :show ] do
+    member do
+      patch :cancel
+    end
+  end
 
   # ======================
   # ADMIN

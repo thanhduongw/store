@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: store
+    runtime: docker
+    branch: feature/fix-ecommerce
+    plan: free
+    healthCheckPath: /up
+    envVars:
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: RAILS_SERVE_STATIC_FILES
+        value: "true"
+      - key: RAILS_LOG_TO_STDOUT
+        value: "true"

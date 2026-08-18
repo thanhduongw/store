@@ -13,18 +13,62 @@
 
 <div class="bg-white rounded-sm shadow-sm p-4 md:p-6">
   <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
-    <!-- Ảnh -->
-    <div class="md:col-span-5">
-      <div class="aspect-square bg-gray-50 rounded-sm overflow-hidden border border-gray-100 relative group">
-        <% if @product.featured_image.attached? %>
-          <%= image_tag @product.featured_image.variant(resize_to_limit: [800, 800]),
-                class: "w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" %>
-        <% else %>
-          <div class="w-full h-full flex items-center justify-center text-gray-300">
-            <svg class="w-20 h-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+    <!-- Ảnh Gallery -->
+    <div class="md:col-span-5" data-controller="gallery">
+      <% if @product.images.attached? %>
+        <!-- Main image -->
+        <div class="aspect-square bg-gray-50 rounded-sm overflow-hidden border border-gray-100 relative group">
+          <% @product.images.each_with_index do |img, i| %>
+            <%= image_tag img,
+                  alt: @product.name,
+                  data: { gallery_target: "slide", index: i },
+                  class: "w-full h-full object-contain transition-opacity duration-300 #{i == 0 ? '' : 'hidden'}" %>
+          <% end %>
+
+          <% if @product.images.count > 1 %>
+            <button type="button"
+                    data-action="click->gallery#prev"
+                    class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white rounded-full shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button type="button"
+                    data-action="click->gallery#next"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white rounded-full shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+            <!-- Dots indicator -->
+            <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+              <% @product.images.count.times do |i| %>
+                <button type="button"
+                        data-action="click->gallery#goTo"
+                        data-index="<%= i %>"
+                        data-gallery-target="dot"
+                        class="w-1.5 h-1.5 rounded-full transition-colors <%= i == 0 ? 'bg-[#ee4d2d]' : 'bg-gray-300' %>"></button>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Thumbnails -->
+        <% if @product.images.count > 1 %>
+          <div class="flex gap-2 mt-3 overflow-x-auto pb-1">
+            <% @product.images.each_with_index do |img, i| %>
+              <button type="button"
+                      data-action="click->gallery#goTo"
+                      data-index="<%= i %>"
+                      data-gallery-target="thumb"
+                      class="w-16 h-16 flex-shrink-0 rounded-sm border-2 overflow-hidden transition-colors <%= i == 0 ? 'border-[#ee4d2d]' : 'border-gray-200 hover:border-gray-400' %>">
+                <%= image_tag img, alt: "#{@product.name} #{i + 1}", class: "w-full h-full object-cover" %>
+              </button>
+            <% end %>
           </div>
         <% end %>
-      </div>
+
+      <% else %>
+        <div class="aspect-square bg-gray-50 rounded-sm border border-gray-100 flex items-center justify-center text-gray-300">
+          <svg class="w-20 h-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        </div>
+      <% end %>
     </div>
 
     <!-- Info -->
@@ -57,19 +101,9 @@
 
       <!-- Price box -->
       <div class="bg-gray-50 rounded-sm px-5 py-4 flex items-baseline gap-3 mb-5 flex-wrap">
-        <% if @product.on_sale? %>
-          <span class="text-gray-400 line-through text-lg">
-            ₫<%= number_with_delimiter(@product.compare_at_price.to_i, delimiter: '.') %>
-          </span>
-        <% end %>
         <span class="text-[#ee4d2d] text-3xl md:text-4xl font-medium">
           <span class="text-xl align-top">₫</span><%= number_with_delimiter(@product.price.to_i, delimiter: '.') %>
         </span>
-        <% if @product.on_sale? %>
-          <span class="bg-[#ee4d2d] text-white text-xs font-bold px-2 py-1 rounded-sm">
-            <%= @product.discount_percentage %>% GIẢM
-          </span>
-        <% end %>
       </div>
 
       <!-- Shipping info -->

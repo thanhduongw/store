@@ -2,9 +2,22 @@ class Admin::ProductsController < Admin::BaseController
   before_action :set_product, only: %i[show edit update destroy]
 
   def index
-    scope = Product.includes(:category, featured_image_attachment: :blob).order(created_at: :desc)
-    scope = scope.where("name LIKE ? OR sku LIKE ?", "%#{params[:q]}%", "%#{params[:q]}%") if params[:q].present?
+    scope = Product
+      .includes(:category, images_attachments: :blob)
+      .order(created_at: :desc)
+
+    if params[:q].present?
+      query = "%#{params[:q]}%"
+
+      scope = scope.where(
+        "name LIKE ? OR sku LIKE ?",
+        query,
+        query
+      )
+    end
+
     scope = scope.where(status: params[:status]) if params[:status].present?
+
     @pagy, @products = pagy(:offset, scope, limit: 20)
   end
 
@@ -19,7 +32,8 @@ class Admin::ProductsController < Admin::BaseController
     @product = Product.new(product_params)
 
     if @product.save
-      redirect_to admin_product_path(@product), notice: "Sản phẩm đã được tạo."
+      redirect_to admin_product_path(@product),
+                  notice: "Sản phẩm đã được tạo."
     else
       render :new, status: :unprocessable_entity
     end
@@ -29,10 +43,16 @@ class Admin::ProductsController < Admin::BaseController
   end
 
   def update
-    @product.featured_image.purge if params.dig(:product, :remove_featured_image) == "1"
+    # Xóa các ảnh được chọn
+    if params[:product][:remove_image_ids].present?
+      params[:product][:remove_image_ids].each do |id|
+        @product.images.find_by(id: id)&.purge
+      end
+    end
 
-    if @product.update(product_params)
-      redirect_to admin_product_path(@product), notice: "Sản phẩm đã được cập nhật."
+    if @product.update(product_params.except(:remove_image_ids))
+      redirect_to admin_product_path(@product),
+                  notice: "Sản phẩm đã được cập nhật."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -40,7 +60,9 @@ class Admin::ProductsController < Admin::BaseController
 
   def destroy
     @product.destroy
-    redirect_to admin_products_path, notice: "Sản phẩm đã được xóa."
+
+    redirect_to admin_products_path,
+                notice: "Sản phẩm đã được xóa."
   end
 
   private
@@ -51,8 +73,16 @@ class Admin::ProductsController < Admin::BaseController
 
   def product_params
     params.require(:product).permit(
-      :name, :description, :price, :compare_at_price,
-      :inventory_count, :sku, :status, :category_id, :featured_image
+      :name,
+      :description,
+      :price,
+      :compare_at_price,
+      :inventory_count,
+      :sku,
+      :status,
+      :category_id,
+      images: [],
+      remove_image_ids: []
     )
   end
 end

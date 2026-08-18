@@ -1,15 +1,27 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
 one:
-  name: MyString
-  description: MyText
-  price: 9.99
-  inventory_count: 1
+  name: Sản phẩm mẫu 1
+  description: Mô tả sản phẩm mẫu 1
+  price: 150000.00
+  compare_at_price: 200000.00
+  inventory_count: 100
+  sku: TEST-001
+  status: active
   category: one
 
 two:
-  name: MyString
-  description: MyText
-  price: 9.99
-  inventory_count: 1
+  name: Sản phẩm mẫu 2
+  description: Mô tả sản phẩm mẫu 2
+  price: 250000.00
+  inventory_count: 50
+  sku: TEST-002
+  status: active
   category: two
+
+draft_one:
+  name: Sản phẩm nháp
+  description: Mô tả nháp
+  price: 99000.00
+  inventory_count: 0
+  sku: TEST-DRAFT
+  status: draft
+  category: one

@@ -384,6 +384,7 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   kamal
+  mini_magick
   pagy (~> 43.6)
   propshaft
   puma (>= 5.0)

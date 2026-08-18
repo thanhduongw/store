@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 32px auto; background: #fff; border-radius: 4px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .header { background: linear-gradient(to right, #f53d2d, #ee4d2d); padding: 32px 40px; text-align: center; }
+    .header h1 { color: #fff; margin: 0; font-size: 28px; font-weight: bold; }
+    .header p { color: rgba(255,255,255,0.9); margin: 8px 0 0; }
+    .body { padding: 32px 40px; }
+    .body h2 { color: #333; font-size: 18px; margin-top: 0; }
+    .body p { color: #555; line-height: 1.6; margin: 6px 0; }
+    .info-box { background: #f9f9f9; border: 1px solid #eee; border-radius: 4px; padding: 16px 20px; margin: 16px 0; }
+    .info-box p { margin: 4px 0; font-size: 14px; }
+    .info-box .label { color: #999; }
+    .info-box .value { color: #333; font-weight: 500; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    th { text-align: left; font-size: 13px; color: #999; font-weight: normal; padding: 8px 0; border-bottom: 1px solid #eee; }
+    td { padding: 10px 0; font-size: 14px; color: #444; border-bottom: 1px solid #f5f5f5; }
+    .total-row td { font-weight: bold; color: #ee4d2d; font-size: 16px; border-bottom: none; padding-top: 16px; }
+    .btn { display: inline-block; background: #ee4d2d; color: #fff; text-decoration: none; padding: 12px 32px; border-radius: 4px; font-weight: bold; margin: 16px 0; }
+    .footer { background: #f9f9f9; padding: 20px 40px; text-align: center; color: #999; font-size: 13px; border-top: 1px solid #eee; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Store</h1>
+      <p>Đơn hàng của bạn đã được xác nhận ✓</p>
+    </div>
+    <div class="body">
+      <h2>Cảm ơn bạn đã đặt hàng!</h2>
+      <p>Mã đơn hàng của bạn là <strong>#<%= @order.id %></strong>. Chúng tôi sẽ xử lý và giao hàng sớm nhất có thể.</p>
+
+      <div class="info-box">
+        <p><span class="label">Người nhận: </span><span class="value"><%= @order.full_name %></span></p>
+        <p><span class="label">Điện thoại: </span><span class="value"><%= @order.phone %></span></p>
+        <p><span class="label">Địa chỉ: </span><span class="value"><%= @order.address %></span></p>
+        <p><span class="label">Trạng thái: </span><span class="value"><%= @order.status_label %></span></p>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Sản phẩm</th>
+            <th style="text-align:center">SL</th>
+            <th style="text-align:right">Thành tiền</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @order.order_items.each do |item| %>
+            <tr>
+              <td><%= item.product_name %></td>
+              <td style="text-align:center"><%= item.quantity %></td>
+              <td style="text-align:right"><%= number_to_currency(item.total_price, unit: "₫", precision: 0, format: "%n%u") %></td>
+            </tr>
+          <% end %>
+          <tr class="total-row">
+            <td colspan="2">Tổng cộng</td>
+            <td style="text-align:right"><%= number_to_currency(@order.total, unit: "₫", precision: 0, format: "%n%u") %></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="text-align: center;">
+        <a href="<%= order_url(@order) %>" class="btn">Xem đơn hàng</a>
+      </p>
+    </div>
+    <div class="footer">
+      © <%= Date.current.year %> Store. Bản quyền thuộc về Store.
+    </div>
+  </div>
+</body>
+</html>

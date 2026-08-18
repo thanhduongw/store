@@ -1,21 +1,15 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
 one:
   user: one
-  status: MyString
-  total: 9.99
-  \: MyString
-  full_name: MyString
-  phone: MyString
-  address: MyText
-  note: MyText
+  full_name: Nguyễn Văn A
+  phone: "0901234567"
+  address: 123 Đường ABC, Quận 1, TP.HCM
+  status: pending
+  total: 150000.00
 
 two:
   user: two
-  status: MyString
-  total: 9.99
-  \: MyString
-  full_name: MyString
-  phone: MyString
-  address: MyText
-  note: MyText
+  full_name: Trần Thị B
+  phone: "0912345678"
+  address: 456 Đường XYZ, Quận 2, TP.HCM
+  status: paid
+  total: 890000.00

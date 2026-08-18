@@ -1,6 +1,5 @@
-<%# QUAN TRỌNG: form_with phải dùng model: [:admin, product] để submit đúng vào
-    /admin/products (namespace admin), tránh bị lỗi post nhầm sang route công khai. %>
-<%= form_with(model: [ :admin, product ], class: "space-y-6") do |form| %>
+<%# form_with model: [:admin, product] để submit đúng namespace admin %>
+<%= form_with(model: [:admin, product], class: "space-y-6", html: { multipart: true }) do |form| %>
   <% if product.errors.any? %>
     <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-sm">
       <h3 class="font-medium"><%= pluralize(product.errors.count, "lỗi") %> ngăn không cho lưu:</h3>
@@ -24,16 +23,9 @@
         <%= form.text_area :description, rows: 5, class: "block w-full rounded-sm border-gray-300 shadow-sm focus:border-[#ee4d2d] focus:ring-[#ee4d2d]" %>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <%= form.label :price, "Giá bán (₫)", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= form.number_field :price, step: 1000, min: 0, class: "block w-full rounded-sm border-gray-300 shadow-sm focus:border-[#ee4d2d] focus:ring-[#ee4d2d]" %>
-        </div>
-
-        <div>
-          <%= form.label :compare_at_price, "Giá gốc (để hiện giảm giá)", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= form.number_field :compare_at_price, step: 1000, min: 0, class: "block w-full rounded-sm border-gray-300 shadow-sm focus:border-[#ee4d2d] focus:ring-[#ee4d2d]" %>
-        </div>
+      <div>
+        <%= form.label :price, "Giá bán (₫)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.number_field :price, step: 1000, min: 0, class: "block w-full rounded-sm border-gray-300 shadow-sm focus:border-[#ee4d2d] focus:ring-[#ee4d2d]" %>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -41,7 +33,6 @@
           <%= form.label :inventory_count, "Số lượng tồn kho", class: "block text-sm font-medium text-gray-700 mb-1" %>
           <%= form.number_field :inventory_count, min: 0, class: "block w-full rounded-sm border-gray-300 shadow-sm focus:border-[#ee4d2d] focus:ring-[#ee4d2d]" %>
         </div>
-
         <div>
           <%= form.label :sku, "Mã SKU", class: "block text-sm font-medium text-gray-700 mb-1" %>
           <%= form.text_field :sku, class: "block w-full rounded-sm border-gray-300 shadow-sm focus:border-[#ee4d2d] focus:ring-[#ee4d2d]" %>
@@ -53,37 +44,40 @@
           <%= form.label :status, "Trạng thái", class: "block text-sm font-medium text-gray-700 mb-1" %>
           <%= form.select :status, Product::STATUSES.map { |s| [s.humanize, s] }, {}, class: "block w-full rounded-sm border-gray-300 shadow-sm focus:border-[#ee4d2d] focus:ring-[#ee4d2d]" %>
         </div>
-
         <div>
           <%= form.label :category_id, "Danh mục", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= form.collection_select :category_id, Category.order(:name), :id, :name, { include_blank: "Chọn danh mục" }, class: "block w-full rounded-sm border-gray-300 shadow-sm focus:border-[#ee4d2d] focus:ring-[#ee4d2d]" %>
+          <%= form.collection_select :category_id, Category.order(:name), :id, :name, { include_blank: "— Chưa phân loại —" }, class: "block w-full rounded-sm border-gray-300 shadow-sm focus:border-[#ee4d2d] focus:ring-[#ee4d2d]" %>
         </div>
       </div>
     </div>
 
-    <div class="space-y-3">
-      <label class="block text-sm font-medium text-gray-700">Ảnh sản phẩm</label>
+    <!-- Cột ảnh (hỗ trợ nhiều ảnh) -->
+    <div class="space-y-4">
+      <label class="block text-sm font-medium text-gray-700">Ảnh sản phẩm (có thể chọn nhiều)</label>
 
-      <div class="aspect-square w-full max-w-56 rounded-sm border border-dashed border-gray-300 bg-gray-50 flex items-center justify-center overflow-hidden">
-        <% if product.featured_image.attached? %>
-          <%= image_tag product.featured_image.variant(resize_to_limit: [300, 300]),
-                alt: product.name.presence || "Ảnh sản phẩm",
-                class: "w-full h-full object-contain" %>
-        <% else %>
+      <% if product.persisted? && product.images.attached? %>
+        <div class="grid grid-cols-2 gap-3">
+          <% product.images.each do |image| %>
+            <div class="relative group border rounded-sm overflow-hidden bg-gray-50">
+              <%= image_tag image,
+                    class: "w-full h-32 object-cover",
+                    alt: "Ảnh sản phẩm" %>
+              <label class="absolute top-1 right-1 bg-white/90 rounded px-1.5 py-0.5 text-xs cursor-pointer hover:bg-red-50">
+                <%= check_box_tag "product[remove_image_ids][]", image.id, false, class: "mr-1" %>
+                Xóa
+              </label>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="aspect-square w-full max-w-56 rounded-sm border border-dashed border-gray-300 bg-gray-50 flex items-center justify-center">
           <span class="text-xs text-gray-400">Chưa có ảnh</span>
-        <% end %>
-      </div>
-
-      <%= form.file_field :featured_image, accept: "image/png,image/jpeg,image/webp",
-            class: "block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-sm file:border-0 file:bg-[#ee4d2d] file:text-white hover:file:bg-[#d73211]" %>
-      <p class="text-xs text-gray-400">JPEG, PNG hoặc WEBP, tối đa 5MB.</p>
-
-      <% if product.featured_image.attached? %>
-        <label class="flex items-center gap-2 text-sm text-gray-600">
-          <%= check_box_tag "product[remove_featured_image]", "1", false, class: "rounded-sm border-gray-300 text-[#ee4d2d] focus:ring-[#ee4d2d]" %>
-          Xóa ảnh hiện tại
-        </label>
+        </div>
       <% end %>
+
+      <%= form.file_field :images, multiple: true, accept: "image/png,image/jpeg,image/webp",
+            class: "block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-sm file:border-0 file:bg-[#ee4d2d] file:text-white hover:file:bg-[#d73211]" %>
+      <p class="text-xs text-gray-400">JPEG, PNG hoặc WEBP, tối đa 5MB mỗi ảnh. Có thể chọn nhiều ảnh cùng lúc.</p>
     </div>
   </div>
 
