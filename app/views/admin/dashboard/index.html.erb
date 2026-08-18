@@ -1,19 +1,96 @@
-<%# app/views/admin/dashboard/index.html.erb %>
 <% content_for :title, "Dashboard" %>
 
-<h1 class="text-3xl font-bold mb-8">Dashboard</h1>
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-gray-800">Tổng quan</h1>
+  <p class="text-sm text-gray-500 mt-1">Theo dõi tình hình cửa hàng của bạn</p>
+</div>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-  <div class="bg-white p-6 rounded-lg shadow">
-    <p class="text-gray-500 text-sm">Tổng sản phẩm</p>
-    <p class="text-3xl font-bold mt-1"><%= @products_count %></p>
+<!-- Stats grid -->
+<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+  <div class="bg-white rounded-sm shadow-sm p-4 border-l-4 border-[#ee4d2d]">
+    <p class="text-xs text-gray-500 uppercase tracking-wide">Tổng sản phẩm</p>
+    <p class="text-2xl font-bold mt-1"><%= @products_count %></p>
+    <p class="text-xs text-gray-400 mt-0.5">Đang bán: <%= @active_products %></p>
   </div>
-  <div class="bg-white p-6 rounded-lg shadow">
-    <p class="text-gray-500 text-sm">Tổng đơn hàng</p>
-    <p class="text-3xl font-bold mt-1"><%= @orders_count %></p>
+  <div class="bg-white rounded-sm shadow-sm p-4 border-l-4 border-blue-500">
+    <p class="text-xs text-gray-500 uppercase tracking-wide">Tổng đơn hàng</p>
+    <p class="text-2xl font-bold mt-1"><%= @orders_count %></p>
+    <p class="text-xs text-gray-400 mt-0.5">&nbsp;</p>
   </div>
-  <div class="bg-white p-6 rounded-lg shadow">
-    <p class="text-gray-500 text-sm">Đơn chờ xử lý</p>
-    <p class="text-3xl font-bold mt-1 text-orange-600"><%= @pending_orders %></p>
+  <div class="bg-white rounded-sm shadow-sm p-4 border-l-4 border-orange-400">
+    <p class="text-xs text-gray-500 uppercase tracking-wide">Chờ xử lý</p>
+    <p class="text-2xl font-bold mt-1 text-orange-600"><%= @pending_orders %></p>
+    <p class="text-xs text-gray-400 mt-0.5">&nbsp;</p>
   </div>
+  <div class="bg-white rounded-sm shadow-sm p-4 border-l-4 border-green-500">
+    <p class="text-xs text-gray-500 uppercase tracking-wide">Danh mục</p>
+    <p class="text-2xl font-bold mt-1"><%= @categories_count %></p>
+    <p class="text-xs text-gray-400 mt-0.5">&nbsp;</p>
+  </div>
+  <div class="bg-white rounded-sm shadow-sm p-4 border-l-4 border-emerald-500 col-span-2">
+    <p class="text-xs text-gray-500 uppercase tracking-wide">Doanh thu (đã thanh toán)</p>
+    <p class="text-2xl font-bold mt-1 text-emerald-600">
+      <%= number_to_currency(@total_revenue, unit: "₫", precision: 0) %>
+    </p>
+    <p class="text-xs text-gray-400 mt-0.5">Trạng thái: đã thanh toán + đang vận chuyển</p>
+  </div>
+</div>
+
+<!-- Quick actions -->
+<div class="bg-white rounded-sm shadow-sm p-5 mb-6">
+  <h2 class="font-semibold text-gray-800 mb-3">Thao tác nhanh</h2>
+  <div class="flex flex-wrap gap-3">
+    <%= link_to "+ Thêm sản phẩm", new_admin_product_path, class: "bg-[#ee4d2d] hover:bg-[#d73211] text-white text-sm font-medium px-4 py-2 rounded-sm" %>
+    <%= link_to "Quản lý sản phẩm", admin_products_path, class: "border border-gray-300 hover:bg-gray-50 text-sm px-4 py-2 rounded-sm" %>
+    <%= link_to "Quản lý danh mục", admin_categories_path, class: "border border-gray-300 hover:bg-gray-50 text-sm px-4 py-2 rounded-sm" %>
+    <%= link_to "Đơn hàng chờ xử lý", admin_orders_path(status: "pending"), class: "border border-orange-300 text-orange-600 hover:bg-orange-50 text-sm px-4 py-2 rounded-sm" %>
+  </div>
+</div>
+
+<!-- Recent orders -->
+<div class="bg-white rounded-sm shadow-sm">
+  <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+    <h2 class="font-semibold text-gray-800">Đơn hàng gần đây</h2>
+    <%= link_to "Xem tất cả →", admin_orders_path, class: "text-sm text-[#ee4d2d] hover:underline" %>
+  </div>
+  <% if @recent_orders.any? %>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-100">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã đơn</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Khách hàng</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tổng tiền</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày đặt</th>
+            <th class="px-4 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% @recent_orders.each do |order| %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-3 font-medium text-gray-800 text-sm">#<%= order.id %></td>
+              <td class="px-4 py-3 text-sm text-gray-600"><%= order.full_name %></td>
+              <td class="px-4 py-3 text-sm text-[#ee4d2d] font-medium">
+                <%= number_to_currency(order.total, unit: "₫", precision: 0) %>
+              </td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-1 text-xs rounded-full <%= order.badge_class %>">
+                  <%= order.status_label %>
+                </span>
+              </td>
+              <td class="px-4 py-3 text-sm text-gray-500">
+                <%= order.created_at.strftime("%d/%m/%Y %H:%M") %>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <%= link_to "Xem", admin_order_path(order), class: "text-[#ee4d2d] hover:underline text-sm" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="py-12 text-center text-gray-400 text-sm">Chưa có đơn hàng nào.</div>
+  <% end %>
 </div>

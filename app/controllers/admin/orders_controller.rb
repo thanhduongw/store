@@ -4,18 +4,19 @@ class Admin::OrdersController < Admin::BaseController
   def index
     scope = Order.includes(:user).order(created_at: :desc)
     scope = scope.where(status: params[:status]) if params[:status].present?
-    @orders = scope
+    @pagy, @orders = pagy(:offset, scope, limit: 30)
   end
 
   def show
-    @order_items = @order.order_items.includes(product: { featured_image_attachment: :blob })
+    @order_items = @order.order_items.includes(product: { images_attachments: :blob })
   end
 
   def update
     new_status = params[:order][:status]
 
     unless @order.can_transition_to?(new_status)
-      redirect_to admin_order_path(@order), alert: "Không thể chuyển từ '#{@order.status}' sang '#{new_status}'."
+      redirect_to admin_order_path(@order),
+                  alert: "Không thể chuyển từ '#{@order.status_label}' sang '#{Order::STATUS_LABELS[new_status]}'."
       return
     end
 

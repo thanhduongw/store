@@ -1,7 +1,11 @@
 <h1 class="text-xl font-semibold text-gray-800 mb-4">Quản lý đơn hàng</h1>
 
 <%= form_with url: admin_orders_path, method: :get, class: "bg-white rounded-sm shadow-sm p-4 mb-4 flex flex-wrap gap-3 items-center" do |form| %>
-  <%= form.select :status, options_for_select([ [ "Tất cả trạng thái", "" ] ] + Order::STATUSES.map { |s| [ s.humanize, s ] }, params[:status]),
+  <%= form.select :status,
+        options_for_select(
+          [["Tất cả trạng thái", ""]] + Order::STATUSES.map { |s| [Order::STATUS_LABELS[s], s] },
+          params[:status]
+        ),
         {}, class: "rounded-sm border-gray-300 text-sm focus:border-[#ee4d2d] focus:ring-[#ee4d2d]" %>
   <%= form.submit "Lọc", class: "bg-gray-100 hover:bg-gray-200 text-sm px-4 py-2 rounded-sm cursor-pointer" %>
 <% end %>
@@ -23,22 +27,33 @@
         <tr class="hover:bg-gray-50">
           <td class="px-4 py-3 font-medium text-gray-800">#<%= order.id %></td>
           <td class="px-4 py-3 text-sm text-gray-600"><%= order.full_name %></td>
-          <td class="px-4 py-3 text-sm text-[#ee4d2d] font-medium"><%= number_to_currency(order.total, unit: "₫", precision: 0) %></td>
+          <td class="px-4 py-3 text-sm text-[#ee4d2d] font-medium">
+            <%= number_to_currency(order.total, unit: "₫", precision: 0) %>
+          </td>
           <td class="px-4 py-3">
             <span class="px-2 py-1 text-xs rounded-full <%= order.badge_class %>">
-              <%= order.status.humanize %>
+              <%= order.status_label %>
             </span>
           </td>
           <td class="px-4 py-3 text-sm text-gray-500"><%= order.created_at.strftime("%d/%m/%Y %H:%M") %></td>
           <td class="px-4 py-3 text-right">
-            <%= link_to "Xem", admin_order_path(order), class: "text-[#ee4d2d] hover:underline" %>
+            <%= link_to "Xem", admin_order_path(order), class: "text-[#ee4d2d] hover:underline text-sm" %>
           </td>
         </tr>
       <% end %>
 
       <% if @orders.empty? %>
-        <tr><td colspan="6" class="px-4 py-16 text-center text-gray-400 text-sm">Không có đơn hàng nào.</td></tr>
+        <tr>
+          <td colspan="6" class="px-4 py-16 text-center text-gray-400 text-sm">Không có đơn hàng nào.</td>
+        </tr>
       <% end %>
     </tbody>
   </table>
 </div>
+
+<% if @pagy && @pagy.pages > 1 %>
+  <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
+    <p class="text-gray-500">Hiển thị <%= @pagy.from %>–<%= @pagy.to %> / <%= @pagy.count %> đơn hàng</p>
+    <nav class="flex items-center gap-1"><%== @pagy.series_nav %></nav>
+  </div>
+<% end %>

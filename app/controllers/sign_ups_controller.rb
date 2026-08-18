@@ -13,6 +13,7 @@ class SignUpsController < ApplicationController
     @user = User.new(sign_up_params)
 
     if @user.save
+      UserMailer.welcome_email(@user).deliver_later
       start_new_session_for(@user)
       redirect_to root_path, notice: "Đăng ký thành công! Chào mừng bạn."
     else

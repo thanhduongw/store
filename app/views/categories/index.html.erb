@@ -1,0 +1,33 @@
+<% content_for :title, "Danh mục sản phẩm | Store" %>
+
+<div class="py-4">
+  <div class="bg-white rounded-sm px-4 py-2.5 mb-4 text-sm text-gray-500 flex items-center gap-2 shadow-sm">
+    <%= link_to "Trang chủ", root_path, class: "hover:text-[#ee4d2d]" %>
+    <span>›</span>
+    <span class="text-gray-700">Danh mục</span>
+  </div>
+
+  <div class="bg-white rounded-sm shadow-sm px-4 py-3 mb-4">
+    <h1 class="text-base font-medium text-gray-800">Tất cả danh mục</h1>
+  </div>
+
+  <% if @categories.any? %>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+      <% @categories.each do |category| %>
+        <%= link_to category_path(category), class: "bg-white rounded-sm shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col items-center gap-2 group" do %>
+          <div class="w-14 h-14 rounded-full bg-gradient-to-br from-[#f53d2d] to-[#ee4d2d] flex items-center justify-center">
+            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+          </div>
+          <p class="text-xs font-medium text-gray-700 text-center group-hover:text-[#ee4d2d] leading-tight"><%= category.name %></p>
+          <p class="text-[10px] text-gray-400"><%= category.products_count %> sản phẩm</p>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="bg-white rounded-sm shadow-sm py-20 text-center text-gray-400">
+      Chưa có danh mục nào.
+    </div>
+  <% end %>
+</div>

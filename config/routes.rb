@@ -15,9 +15,16 @@ Rails.application.routes.draw do
   resource :cart, only: [ :show ]
   resources :cart_items, only: [ :create, :update, :destroy ]
 
+  # Tài khoản
+  resource :profile, only: [ :show, :edit, :update ]
+
   # Thanh toán & Đơn hàng
   resource :checkout, only: [ :new, :create ]
-  resources :orders, only: [ :show ]
+  resources :orders, only: [ :index, :show ] do
+    member do
+      patch :cancel
+    end
+  end
 
   # ======================
   # ADMIN

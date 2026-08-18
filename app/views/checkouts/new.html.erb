@@ -16,22 +16,72 @@
           </div>
         <% end %>
 
-        <div class="space-y-4">
+        <div class="space-y-4" data-controller="address">
           <div>
             <%= form.label :full_name, "Họ và tên người nhận", class: "block text-sm text-gray-600 mb-1" %>
             <%= form.text_field :full_name, required: true,
                   class: "w-full rounded-sm border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-[#ee4d2d]" %>
           </div>
+
           <div>
             <%= form.label :phone, "Số điện thoại", class: "block text-sm text-gray-600 mb-1" %>
             <%= form.telephone_field :phone, required: true,
                   class: "w-full rounded-sm border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-[#ee4d2d]" %>
           </div>
+
+          <% unless authenticated? %>
+            <div>
+              <%= form.label :email, "Email (để nhận xác nhận đơn hàng)", class: "block text-sm text-gray-600 mb-1" %>
+              <%= form.email_field :email, placeholder: "example@gmail.com",
+                    class: "w-full rounded-sm border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-[#ee4d2d]" %>
+            </div>
+          <% end %>
+
           <div>
-            <%= form.label :address, "Địa chỉ giao hàng", class: "block text-sm text-gray-600 mb-1" %>
-            <%= form.text_area :address, rows: 3, required: true,
-                  class: "w-full rounded-sm border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-[#ee4d2d]" %>
+            <label class="block text-sm text-gray-600 mb-1">Tỉnh / Thành phố</label>
+            <select name="province"
+                    required
+                    data-address-target="province"
+                    data-action="change->address#provinceChanged"
+                    class="w-full rounded-sm border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-[#ee4d2d] bg-white">
+              <option value="">-- Chọn Tỉnh/Thành phố --</option>
+            </select>
           </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">Quận / Huyện</label>
+              <select name="district"
+                      required
+                      disabled
+                      data-address-target="district"
+                      data-action="change->address#districtChanged"
+                      class="w-full rounded-sm border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-[#ee4d2d] bg-white disabled:bg-gray-50 disabled:text-gray-400">
+                <option value="">-- Chọn Quận/Huyện --</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">Phường / Xã</label>
+              <select name="ward"
+                      required
+                      disabled
+                      data-address-target="ward"
+                      class="w-full rounded-sm border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-[#ee4d2d] bg-white disabled:bg-gray-50 disabled:text-gray-400">
+                <option value="">-- Chọn Phường/Xã --</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">Địa chỉ cụ thể <span class="text-gray-400">(số nhà, tên đường)</span></label>
+            <input type="text"
+                   name="specific_address"
+                   required
+                   placeholder="VD: 123 Đường Nguyễn Trãi"
+                   class="w-full rounded-sm border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-[#ee4d2d]"
+                   data-address-target="specific" />
+          </div>
+
           <div>
             <%= form.label :note, "Ghi chú (tùy chọn)", class: "block text-sm text-gray-600 mb-1" %>
             <%= form.text_area :note, rows: 2,
@@ -45,8 +95,8 @@
         <div class="space-y-3">
           <% @cart.cart_items.each do |item| %>
             <div class="flex items-center gap-4">
-              <% if item.product.featured_image.attached? %>
-                <%= image_tag item.product.featured_image.variant(resize_to_limit: [56, 56]),
+              <% if item.product.featured_image_attached? %>
+                <%= image_tag item.product.featured_image,
                       alt: item.product.name,
                       class: "w-14 h-14 object-cover rounded border border-gray-100" %>
               <% else %>

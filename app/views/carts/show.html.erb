@@ -14,8 +14,8 @@
       <% @cart.cart_items.each do |item| %>
         <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center px-6 py-5 border-b last:border-b-0">
           <div class="sm:col-span-6 flex items-center gap-4">
-            <% if item.product.featured_image.attached? %>
-              <%= image_tag item.product.featured_image.variant(resize_to_limit: [70, 70]),
+            <% if item.product.featured_image_attached? %>
+              <%= image_tag item.product.featured_image,
                     alt: item.product.name,
                     class: "w-16 h-16 object-cover rounded border border-gray-100" %>
             <% else %>

@@ -1,0 +1,19 @@
+Cảm ơn bạn đã đặt hàng tại Store!
+
+Mã đơn hàng: #<%= @order.id %>
+Người nhận:  <%= @order.full_name %>
+Điện thoại:  <%= @order.phone %>
+Địa chỉ:     <%= @order.address %>
+Trạng thái:  <%= @order.status_label %>
+
+Sản phẩm:
+<% @order.order_items.each do |item| %>
+- <%= item.product_name %> x<%= item.quantity %> — <%= number_to_currency(item.total_price, unit: "₫", precision: 0, format: "%n%u") %>
+<% end %>
+
+Tổng cộng: <%= number_to_currency(@order.total, unit: "₫", precision: 0, format: "%n%u") %>
+
+Xem đơn hàng: <%= order_url(@order) %>
+
+Trân trọng,
+Đội ngũ Store

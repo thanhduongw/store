@@ -4,7 +4,7 @@
 
 <div class="flex items-center gap-3 mb-6">
   <h1 class="text-2xl font-bold">Đơn hàng #<%= @order.id %></h1>
-  <span class="px-2 py-1 text-xs rounded-full <%= @order.badge_class %>"><%= @order.status.humanize %></span>
+  <span class="px-2 py-1 text-xs rounded-full <%= @order.badge_class %>"><%= @order.status_label %></span>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -14,14 +14,20 @@
       <div class="flex items-center justify-between py-3 border-b last:border-b-0">
         <div class="flex items-center gap-3">
           <div class="w-12 h-12 rounded-sm border bg-gray-50 flex-shrink-0 flex items-center justify-center overflow-hidden">
-            <% if item.product&.featured_image&.attached? %>
-              <%= image_tag item.product.featured_image.variant(resize_to_limit: [96, 96]),
+            <% if item.product&.featured_image_attached? %>
+              <%= image_tag item.product.featured_image,
                     alt: item.product_name, class: "w-full h-full object-cover" %>
             <% else %>
               <span class="text-[9px] text-gray-400 text-center px-1">Không ảnh</span>
             <% end %>
           </div>
-          <span class="text-sm text-gray-700"><%= item.product_name %> × <%= item.quantity %></span>
+          <div>
+            <span class="text-sm text-gray-700"><%= item.product_name %></span>
+            <span class="text-xs text-gray-400 ml-1">× <%= item.quantity %></span>
+            <% if item.product.nil? %>
+              <p class="text-[10px] text-gray-400">(sản phẩm đã bị xóa)</p>
+            <% end %>
+          </div>
         </div>
         <span class="text-sm font-medium"><%= number_to_currency(item.total_price, unit: "₫", precision: 0) %></span>
       </div>
@@ -32,22 +38,36 @@
     </div>
   </div>
 
-  <div class="bg-white p-6 rounded-sm shadow-sm space-y-6">
-    <div>
-      <h2 class="font-bold mb-2">Thông tin giao hàng</h2>
-      <p class="mb-1 text-sm"><strong>Người nhận:</strong> <%= @order.full_name %></p>
-      <p class="mb-1 text-sm"><strong>SĐT:</strong> <%= @order.phone %></p>
-      <p class="text-sm"><strong>Địa chỉ:</strong> <%= @order.address %></p>
+  <div class="space-y-4">
+    <div class="bg-white p-6 rounded-sm shadow-sm">
+      <h2 class="font-bold mb-3">Thông tin giao hàng</h2>
+      <div class="space-y-2 text-sm">
+        <div><span class="text-gray-500">Người nhận:</span> <span class="font-medium"><%= @order.full_name %></span></div>
+        <div><span class="text-gray-500">SĐT:</span> <span class="font-medium"><%= @order.phone %></span></div>
+        <div><span class="text-gray-500">Địa chỉ:</span> <%= @order.address %></div>
+        <% if @order.note.present? %>
+          <div><span class="text-gray-500">Ghi chú:</span> <%= @order.note %></div>
+        <% end %>
+        <div><span class="text-gray-500">Ngày đặt:</span> <%= @order.created_at.strftime("%d/%m/%Y %H:%M") %></div>
+        <% if @order.user %>
+          <div><span class="text-gray-500">Tài khoản:</span> <%= @order.user.email_address %></div>
+        <% else %>
+          <div><span class="text-gray-500">Khách:</span> Chưa đăng nhập</div>
+        <% end %>
+      </div>
     </div>
 
-    <div>
-      <h2 class="font-bold mb-2">Cập nhật trạng thái</h2>
+    <div class="bg-white p-6 rounded-sm shadow-sm">
+      <h2 class="font-bold mb-3">Cập nhật trạng thái</h2>
       <% next_statuses = Order::VALID_STATUS_TRANSITIONS[@order.status] %>
       <% if next_statuses.blank? %>
-        <p class="text-sm text-gray-400">Đơn hàng đã ở trạng thái cuối, không thể chuyển tiếp.</p>
+        <p class="text-sm text-gray-400">Đơn hàng đã ở trạng thái cuối.</p>
       <% else %>
-        <%= form_with model: [ :admin, @order ], class: "space-y-3" do |form| %>
-          <%= form.select :status, next_statuses.map { |s| [ s.humanize, s ] }, {}, class: "w-full rounded-sm border-gray-300 text-sm focus:border-[#ee4d2d] focus:ring-[#ee4d2d]" %>
+        <%= form_with model: [:admin, @order], class: "space-y-3" do |form| %>
+          <%= form.select :status,
+                next_statuses.map { |s| [Order::STATUS_LABELS[s], s] },
+                {},
+                class: "w-full rounded-sm border-gray-300 text-sm focus:border-[#ee4d2d] focus:ring-[#ee4d2d]" %>
           <%= form.submit "Cập nhật", class: "w-full bg-[#ee4d2d] hover:bg-[#d73211] text-white py-2 rounded-sm cursor-pointer" %>
         <% end %>
       <% end %>

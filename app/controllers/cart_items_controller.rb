@@ -1,4 +1,6 @@
 class CartItemsController < ApplicationController
+  allow_unauthenticated_access
+
   def create
     product = Product.find(params[:product_id])
     quantity  = [ params[:quantity].to_i, 1 ].max

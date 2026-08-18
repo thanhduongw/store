@@ -11,6 +11,13 @@ class Order < ApplicationRecord
     "cancelled" => []
   }.freeze
 
+  STATUS_LABELS = {
+    "pending"   => "Chờ xử lý",
+    "paid"      => "Đã thanh toán",
+    "shipped"   => "Đang vận chuyển",
+    "cancelled" => "Đã hủy"
+  }.freeze
+
   STATUS_BADGE_CLASSES = {
     "pending"   => "bg-yellow-100 text-yellow-800",
     "paid"      => "bg-blue-100 text-blue-800",
@@ -30,6 +37,10 @@ class Order < ApplicationRecord
 
   def badge_class
     STATUS_BADGE_CLASSES.fetch(status, "bg-gray-100 text-gray-800")
+  end
+
+  def status_label
+    STATUS_LABELS.fetch(status, status)
   end
 
   def self.create_from_cart!(cart, order_params, user = nil)
