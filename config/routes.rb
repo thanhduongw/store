@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  # Health check (Render, load balancers, uptime monitors)
+  get "up" => "rails/health#show", as: :rails_health_check
+
   # Trang chủ
   root "products#index"
 
